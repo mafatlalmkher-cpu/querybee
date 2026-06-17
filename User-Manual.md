@@ -59,7 +59,7 @@ QueryBee shows a finished query for each selected database. Press "Copy", then p
 
 ## 5.5 Narrow the topic (optional)
 
-If your search is too broad, pick a sharper angle and run another pass with your assistant.
+If a search returns too much, narrow it deliberately rather than by deleting terms at random. Add a fourth concept that every relevant paper must share, such as a population, a setting, a method, or an outcome (for example children, in vitro, or randomized). Tighten the year range to the period that matters. Restrict the document type, for example to reviews, using the document-type control rather than by adding words. Replace a broad concept word with a more specific one (for example carcinoma instead of cancer) only when you accept the narrower scope. Re-run the recall check after each change, so you raise precision without dropping studies you need. The companion documents, Searching effectively with QueryBee and the Subject Playbooks, show this in context for each field.
 
 ## 5.6 Add MeSH headings for PubMed (optional)
 

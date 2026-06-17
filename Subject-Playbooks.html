@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Mafatlal M. Kher · Ariel University" />
+  <title>QueryBee Subject Playbooks</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <style type="text/css">html{ font-size:16px; }
+body{
+max-width:46rem; margin:2.2rem auto 4rem; padding:0 1.3rem;
+font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+color:#211C16; line-height:1.62; background:#FBF8F3;
+}
+h1,h2,h3{ font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.25; color:#15110C; }
+h1.title{ font-size:2rem; margin:.2rem 0 .1rem; }
+p.subtitle{ font-size:1.06rem; color:#6A5F52; font-style:italic; margin:.1rem 0 .2rem; font-family:inherit; }
+p.date{ color:#9A8F80; font-size:.92rem; margin:.1rem 0 1.6rem; }
+h1{ font-size:1.42rem; margin:2.1rem 0 .5rem; padding-bottom:.28rem; border-bottom:2px solid #E6DDCE; }
+h2{ font-size:1.12rem; margin:1.5rem 0 .35rem; color:#6A5F52; }
+a{ color:#9C4D12; }
+code{ background:#F4EEE3; padding:.04rem .3rem; border-radius:3px; font-size:.92em; }
+ul,ol{ padding-left:1.3rem; }
+li{ margin:.18rem 0; }
+#TOC{ background:#F4EEE3; border:1px solid #E6DDCE; border-radius:8px; padding:.6rem 1rem; margin:1.2rem 0 1.6rem; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; }
+#TOC ul{ list-style:none; padding-left:.6rem; }
+#TOC>ul{ padding-left:0; }
+#TOC a{ color:#15110C; text-decoration:none; }
+@media print{ body{ background:#fff; max-width:none; } }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">QueryBee Subject Playbooks</h1>
+<p class="subtitle">Which databases to combine, what to add, and what to avoid, field by field</p>
+<p class="author">Mafatlal M. Kher · Ariel University</p>
+<p class="date">For QueryBee 1.2.0</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#medicine-and-clinical-research">Medicine and clinical research</a></li>
+<li><a href="#plant-science-agriculture-and-plant-pathology">Plant science, agriculture, and plant pathology</a></li>
+<li><a href="#ecology-and-environmental-science">Ecology and environmental science</a></li>
+<li><a href="#computer-science-and-engineering">Computer science and engineering</a></li>
+<li><a href="#education">Education</a></li>
+<li><a href="#psychology-and-behavioural-science">Psychology and behavioural science</a></li>
+<li><a href="#business-management-and-economics">Business, management, and economics</a></li>
+<li><a href="#chemistry-materials-and-physical-sciences">Chemistry, materials, and physical sciences</a></li>
+<li><a href="#one-habit-for-every-field">One habit for every field</a></li>
+</ul>
+</nav>
+<p>QueryBee builds the query; this companion tells you, for your field, which databases to combine, which controlled vocabulary to add by hand, how to phrase concepts, and the mistakes that quietly cost recall. No single database covers a field completely, so each recipe names a combination. After building a query, run the recall check against a few papers you already know to confirm the combination is catching them.</p>
+<p>How to read a recipe. “Turn on in QueryBee” are the engines QueryBee writes a query for directly. “Add separately” are databases you reach through Ovid or EBSCO using QueryBee’s platform query, or that you search on their own. “Controlled vocabulary” is the thesaurus you add inside that database, because it is proprietary and not embedded in the tool.</p>
+<h1 id="medicine-and-clinical-research">Medicine and clinical research</h1>
+<p><strong>Turn on in QueryBee:</strong> PubMed, Scopus, Web of Science. <strong>Add separately:</strong> Embase through Ovid (use QueryBee’s Ovid query). Embase is expected for clinical and drug reviews. Search trial registries (ClinicalTrials.gov) on their own. <strong>Controlled vocabulary:</strong> MeSH in PubMed (the Suggest MeSH headings button), Emtree in Embase. <strong>Term tips:</strong> build population, intervention, and outcome as separate concepts. Pair MeSH with free-text in PubMed, because recent papers are not yet indexed with MeSH. Include drug generic and brand names, and both British and American spellings. <strong>Common mistakes:</strong> searching MeSH alone (misses the newest papers) or free-text alone (misses well-indexed older ones); skipping Embase; adding study-design words to the query instead of using the database’s filters. <strong>Effective use:</strong> build free-text in QueryBee, add MeSH in the PubMed panel, paste the Ovid query into Embase and add Emtree. Two databases minimum, three for a systematic review.</p>
+<h1 id="plant-science-agriculture-and-plant-pathology">Plant science, agriculture, and plant pathology</h1>
+<p><strong>Turn on in QueryBee:</strong> Scopus, Web of Science, PubMed. <strong>Add separately:</strong> CAB Abstracts through Ovid or EBSCO (the core applied-agriculture database), and AGRIS or AGRICOLA where available. <strong>Controlled vocabulary:</strong> the CAB Thesaurus in CAB Abstracts; MeSH covers part of plant molecular biology in PubMed. <strong>Term tips:</strong> include the crop’s common name and its Latin binomial (grapevine and <em>Vitis vinifera</em>), the pathogen’s current and former names (<em>Erysiphe necator</em> and <em>Uncinula necator</em>), and abbreviations with their full form (GLRaV-3 and grapevine leafroll-associated virus 3). Add method names (RT-qPCR, ELISA, high-throughput sequencing). <strong>Common mistakes:</strong> using only the common crop name and missing Latin-name papers; using only the current pathogen name and missing older synonyms; skipping CAB Abstracts, where much applied agronomy sits and PubMed does not reach; over-truncating a genus name. <strong>Effective use:</strong> run Scopus, Web of Science, and PubMed in QueryBee, run the Ovid or EBSCO query in CAB Abstracts and add CAB Thesaurus terms, then use the recall check with five known papers to surface missing Latin or synonym terms.</p>
+<h1 id="ecology-and-environmental-science">Ecology and environmental science</h1>
+<p><strong>Turn on in QueryBee:</strong> Scopus, Web of Science. <strong>Add separately:</strong> CAB Abstracts (applied ecology) through Ovid or EBSCO; GeoRef through Engineering Village for earth-science overlap; a grey-literature source on its own, because environmental evidence guidance expects it. <strong>Controlled vocabulary:</strong> CAB Thesaurus where used. <strong>Term tips:</strong> ecology reviews need broad synonym sets, taxon names at the right rank, and often geographic terms. The Web of Science Core Collection is strong here. <strong>Common mistakes:</strong> taxon terms that are too narrow; ignoring grey literature (against CEE guidance); a single database. <strong>Effective use:</strong> follow Collaboration for Environmental Evidence guidance: at least two bibliographic databases plus a grey-literature search.</p>
+<h1 id="computer-science-and-engineering">Computer science and engineering</h1>
+<p><strong>Turn on in QueryBee:</strong> IEEE Xplore, ACM Digital Library, Scopus, Engineering Village (Compendex and Inspec). <strong>Controlled vocabulary:</strong> the Inspec Thesaurus in Engineering Village. <strong>Term tips:</strong> include each acronym with its expansion (CNN and convolutional neural network). Conference papers carry primary results in this field, so include conference papers in the Scopus document-type filter. Terminology shifts fast, so mine recent terms with the find-terms button. <strong>Common mistakes:</strong> excluding conference papers; searching only IEEE and missing ACM, or the reverse; not capturing acronym variants. <strong>Effective use:</strong> IEEE Command Search, ACM with the field set to Abstract, and Compendex with Inspec, with conference papers kept in the document-type filter.</p>
+<h1 id="education">Education</h1>
+<p><strong>Turn on in QueryBee:</strong> ERIC, Scopus, Web of Science. <strong>Add separately:</strong> PsycINFO through Ovid or EBSCO for educational-psychology overlap; the British Education Index through EBSCO for UK coverage. <strong>Controlled vocabulary:</strong> ERIC Thesaurus descriptors in ERIC. <strong>Term tips:</strong> education terms are often phrases and policy labels. Include US and UK terminology and spelling (math and maths; K-12 and key stage). <strong>Common mistakes:</strong> ERIC alone; missing the PsycINFO overlap; ignoring UK or US terminology. <strong>Effective use:</strong> ERIC plus one multidisciplinary database, adding PsycINFO when the topic is psychological.</p>
+<h1 id="psychology-and-behavioural-science">Psychology and behavioural science</h1>
+<p><strong>Turn on in QueryBee:</strong> Scopus, Web of Science, PubMed (for clinical topics). <strong>Add separately:</strong> PsycINFO through Ovid or EBSCO is the primary database; use QueryBee’s platform query. <strong>Controlled vocabulary:</strong> the APA Thesaurus of Psychological Index Terms in PsycINFO. <strong>Term tips:</strong> include construct synonyms and the names of measures and scales. PsycINFO indexing is rich, so pair free-text with APA descriptors. <strong>Common mistakes:</strong> free-text only, which misses APA-indexed records; a single database. <strong>Effective use:</strong> PsycINFO with APA descriptors, plus Scopus and Web of Science.</p>
+<h1 id="business-management-and-economics">Business, management, and economics</h1>
+<p><strong>Turn on in QueryBee:</strong> Scopus, Web of Science. <strong>Add separately:</strong> Business Source and EconLit through EBSCO (use QueryBee’s EBSCO query). <strong>Controlled vocabulary:</strong> EconLit and Business Source subject terms in EBSCO. <strong>Term tips:</strong> include both academic and practitioner synonyms, because the literature splits between them. Journal-quality scoping (for example ABS or AJG lists) is done separately if your review needs it. <strong>Common mistakes:</strong> academic-only terms that miss the practitioner literature; a single database. <strong>Effective use:</strong> Scopus and Web of Science plus the EBSCO query in Business Source and EconLit.</p>
+<h1 id="chemistry-materials-and-physical-sciences">Chemistry, materials, and physical sciences</h1>
+<p><strong>Turn on in QueryBee:</strong> Scopus, Web of Science. <strong>Add separately:</strong> Compendex and Inspec through Engineering Village. Structure and reaction searches use specialist tools (SciFinder, Reaxys) on their own. <strong>Controlled vocabulary:</strong> the Inspec Thesaurus in Engineering Village. <strong>Term tips:</strong> include compound names, formulae, and abbreviations. Term mining works well here, because physical-science vocabulary is distinctive, so the keyness ranking is reliable. <strong>Common mistakes:</strong> missing formula or abbreviation variants; ignoring Inspec for applied physics. <strong>Effective use:</strong> Scopus and Web of Science with Inspec, and lean on the term miner, which is strongest in the physical sciences.</p>
+<h1 id="one-habit-for-every-field">One habit for every field</h1>
+<p>Whatever your field, the fastest quality check is the same: paste three to ten papers you know should be found into the recall check, and add a synonym to whichever concept block it names as missing. This catches the field-specific term you forgot (a Latin name, an acronym, a measure name) before you run the search for real, which is where the tool saves you the most time.</p>
+</body>
+</html>
