@@ -109,4 +109,6 @@ A known paper shows "missed": read which block it names, then add a synonym to t
 
 # 10. How to cite
 
-Cite QueryBee using the CITATION.cff file in the repository, or the published paper and its DOI once available.
+Cite QueryBee using the repository's `CITATION.cff` file, or:
+
+Kher, M. M. (2026). *QueryBee: a single-file, browser-based fielded Boolean query builder for literature search* (Version 1.2.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20733036
