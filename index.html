@@ -991,10 +991,11 @@
   // not confirmed synonyms; the user screens them. Falls back to a general dictionary, and
   // ultimately to manual entry, when the literature service cannot be reached.
   var OPENALEX = "https://api.openalex.org/works";
-  // TODO before publishing: set OA_MAILTO to a real contact address (a dedicated project
-  // address is cleanest, since it is visible in the page source) to use OpenAlex's faster
-  // "polite pool". Leaving it "" uses the shared pool; the tool still works either way.
-  var OA_MAILTO = "";
+  // OA_MAILTO puts requests in OpenAlex's faster, more reliable "polite pool". Without it the
+  // shared pool throttles bursts (the keyness step makes several requests per click), which can
+  // make term mining fail intermittently. The address is the author's public contact, already
+  // shown in the footer and CITATION, so exposing it in the page source is fine.
+  var OA_MAILTO = "mafatlalmkher@gmail.com";
   // Cached background sizes for keyness scoring: total English works in OpenAlex, and a
   // per-term document-count cache so repeated mining does not refetch the same backgrounds.
   var OA_REFSIZE = 0, OA_BG = {};

@@ -10,6 +10,7 @@ All notable changes to this project are documented here. The format follows
 - Refined the heading to "QueryBee: Boolean query builder for literature search"; updated the page title, meta description, and Open Graph / Twitter tags to ten databases; replaced placeholder URLs with the live GitHub Pages URL.
 - Rewrote the User Manual as a comprehensive reference (time-saving rationale, browser guidance, by-field database selection, do's and don'ts, expanded troubleshooting). Added two companion guides: "Searching effectively with QueryBee" and "Subject Playbooks" (per-field recipes). Updated the README to ten databases with a documentation list.
 - Added a .nojekyll file so GitHub Pages serves the static tool directly.
+- Term mining ("find terms in literature") now uses OpenAlex's polite pool by sending a contact email, which fixes intermittent mining failures caused by shared-pool rate limiting.
 - Wired the Zenodo DOI 10.5281/zenodo.20733036 into CITATION, the README badge, and the manual.
 
 No change to the query-building engine or the test suite (still 21 tests).
