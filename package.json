@@ -1,6 +1,6 @@
 {
   "name": "querybee",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Single-file, browser-based Boolean and fielded literature-search query builder for Scopus, Web of Science, Google Scholar and PubMed.",
   "license": "MIT",
   "type": "commonjs",
