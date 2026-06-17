@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QueryBee: fielded Boolean search queries for Scopus, Web of Science, PubMed, and Google Scholar</title>
 <meta name="description" content="Free, no-login browser tool that turns a research topic into correctly fielded, fully parenthesized Boolean search queries for Scopus, Web of Science, Google Scholar, and PubMed. Concept-term expansion is kept separate from deterministic, per-engine query assembly.">
-<meta name="author" content="Mafatlal Kher">
+<meta name="author" content="Mafatlal M. Kher">
 <link rel="canonical" href="https://example.org/query-builder/"><!-- TODO: set to the published URL after hosting/repo -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="QueryBee: fielded Boolean search queries for four databases">
@@ -26,7 +26,7 @@
   "license": "https://opensource.org/licenses/MIT",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "author": { "@type": "Person", "name": "Mafatlal Kher" }
+  "author": { "@type": "Person", "name": "Mafatlal M. Kher", "affiliation": "Ariel University", "identifier": "https://orcid.org/0000-0001-5600-0040" }
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -500,6 +500,7 @@
   <footer class="foot">
     <p><b>How it works.</b> The query syntax for each database is assembled by the tool itself, so the fielded structure is consistent and editable. The AI step only expands a topic into concept terms, and it runs in whatever chatbot you already use, so the tool needs no API key and costs nothing. Multi-word terms are quoted as phrases, and a trailing asterisk truncates word stems in Scopus, Web of Science, and PubMed. Google Scholar does not support stem truncation, so the asterisk is removed from the Scholar query automatically.</p>
     <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external request is the optional find-terms helper, which mines candidate terms from the OpenAlex scholarly database (free, no account, no key) and falls back to a public dictionary or fails quietly when offline, so the core query builder always works.</p>
+    <p class="cred"><b>QueryBee</b> v1.2.0 &middot; developed by Mafatlal M. Kher, Ariel University &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
   </footer>
 
 </div>

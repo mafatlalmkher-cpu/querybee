@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Mafatlal M. Kher · Ariel University" />
+  <title>Searching effectively with QueryBee</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <style type="text/css">html{ font-size:16px; }
+body{
+max-width:46rem; margin:2.2rem auto 4rem; padding:0 1.3rem;
+font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+color:#211C16; line-height:1.62; background:#FBF8F3;
+}
+h1,h2,h3{ font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.25; color:#15110C; }
+h1.title{ font-size:2rem; margin:.2rem 0 .1rem; }
+p.subtitle{ font-size:1.06rem; color:#6A5F52; font-style:italic; margin:.1rem 0 .2rem; font-family:inherit; }
+p.date{ color:#9A8F80; font-size:.92rem; margin:.1rem 0 1.6rem; }
+h1{ font-size:1.42rem; margin:2.1rem 0 .5rem; padding-bottom:.28rem; border-bottom:2px solid #E6DDCE; }
+h2{ font-size:1.12rem; margin:1.5rem 0 .35rem; color:#6A5F52; }
+a{ color:#9C4D12; }
+code{ background:#F4EEE3; padding:.04rem .3rem; border-radius:3px; font-size:.92em; }
+ul,ol{ padding-left:1.3rem; }
+li{ margin:.18rem 0; }
+#TOC{ background:#F4EEE3; border:1px solid #E6DDCE; border-radius:8px; padding:.6rem 1rem; margin:1.2rem 0 1.6rem; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; font-size:.95rem; }
+#TOC ul{ list-style:none; padding-left:.6rem; }
+#TOC>ul{ padding-left:0; }
+#TOC a{ color:#15110C; text-decoration:none; }
+@media print{ body{ background:#fff; max-width:none; } }
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Searching effectively with QueryBee</h1>
+<p class="subtitle">A short field guide to building searches that find the right papers</p>
+<p class="author">Mafatlal M. Kher · Ariel University</p>
+<p class="date">For QueryBee 1.2.0</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#think-in-concepts-not-sentences">1. Think in concepts, not sentences</a></li>
+<li><a href="#choose-terms-that-discriminate">2. Choose terms that discriminate</a></li>
+<li><a href="#truncate-carefully">3. Truncate carefully</a></li>
+<li><a href="#phrases-against-single-words">4. Phrases against single words</a></li>
+<li><a href="#use-the-ai-step-well-and-record-it">5. Use the AI step well, and record it</a></li>
+<li><a href="#close-the-gap-with-the-recall-check">6. Close the gap with the recall check</a></li>
+<li><a href="#pick-databases-by-field">7. Pick databases by field</a></li>
+<li><a href="#when-to-add-mesh-pubmed">8. When to add MeSH (PubMed)</a></li>
+<li><a href="#a-worked-example-start-to-finish">9. A worked example, start to finish</a></li>
+<li><a href="#common-mistakes-to-avoid">10. Common mistakes to avoid</a></li>
+</ul>
+</nav>
+<p>The User Manual tells you what each control does. This guide tells you how to build a search that actually finds the right papers. QueryBee guarantees correct syntax for you, so your effort goes into the two things it cannot decide: the words you choose, and how you group them.</p>
+<h1 id="think-in-concepts-not-sentences">1. Think in concepts, not sentences</h1>
+<p>A good search is two to four concepts joined with AND. Each concept is one idea in your topic. Inside a concept you list alternative words joined with OR, and QueryBee joins the concepts with AND, so a record must contain at least one word from every concept to match.</p>
+<p>Two to four concepts is the useful range. One concept is usually too broad. Five or more is usually too narrow, because a relevant paper that happens to omit a keyword for one facet drops out. Pick the facets that genuinely define your topic and leave the rest out.</p>
+<h1 id="choose-terms-that-discriminate">2. Choose terms that discriminate</h1>
+<p>Inside each concept, add every way authors write that idea. Include synonyms, British and American spellings (tumour and tumor, colour and color), and abbreviations together with their full form (PCR and “polymerase chain reaction”; GLRaV-3 and “grapevine leafroll-associated virus 3”). Missing one spelling or using only the abbreviation can hide half the literature.</p>
+<p>Avoid generic words that match almost everything, such as “study”, “analysis”, “effect”, or “patients”. They add noise without adding the papers you want. The “find terms in literature” button on each concept harvests candidate terms from real papers and ranks them by keyness, which pushes distinctive terms to the top; keep the ones that fit and ignore the rest.</p>
+<h1 id="truncate-carefully">3. Truncate carefully</h1>
+<p>A trailing asterisk matches word stems: therap* finds therapy, therapies, and therapeutic. Use it where the stem is specific. Do not over-truncate: cell* also matches cellular, cellphone, and cellulose, and cat* matches category and catalog. A stem that is too short floods the results with junk. Google Scholar does not support stem truncation, so QueryBee removes the asterisk from the Scholar query for you.</p>
+<h1 id="phrases-against-single-words">4. Phrases against single words</h1>
+<p>Multi-word ideas should be phrases, for example “machine learning” or “powdery mildew”. QueryBee quotes them automatically. A phrase is stricter, because the words must appear together, which raises precision but can miss spaced or reordered variants. When recall matters, add the key single words as extra alternatives in the same concept.</p>
+<h1 id="use-the-ai-step-well-and-record-it">5. Use the AI step well, and record it</h1>
+<p>The prompt asks a chatbot for concept blocks and candidate terms. Any model you already use works, and no API key is needed. Treat the reply as a draft: delete the generic terms, and add the field-specific ones the model missed. Because models are not reproducible and return different words each time, record which model and which date you used. The query you finally assemble is reproducible, so export the search record and keep it with your methods.</p>
+<h1 id="close-the-gap-with-the-recall-check">6. Close the gap with the recall check</h1>
+<p>Paste three to ten papers you already know should be found, one per line, as a DOI, an OpenAlex ID, or a title. QueryBee fetches each paper’s title and abstract, tests your concept blocks against them, and names the concept block that misses each paper. Add a synonym to that block and check again. Two or three rounds usually tightens the search substantially. This is the fastest way to catch a missing synonym before you run the search for real.</p>
+<h1 id="pick-databases-by-field">7. Pick databases by field</h1>
+<p>Search at least two databases. One is never enough for a thorough review, and the strategy review panel will flag it.</p>
+<ul>
+<li>Any field: Scopus and Web of Science. Use both, because they overlap but each indexes unique sources.</li>
+<li>Biomedicine and life sciences: PubMed, with MeSH headings added (see section 8).</li>
+<li>Computer science and engineering: IEEE Xplore, ACM Digital Library, and Engineering Village (Compendex and Inspec).</li>
+<li>Education: ERIC. Psychology: PsycINFO through Ovid or EBSCO. Nursing: CINAHL through EBSCO. Agriculture and plant science: CAB Abstracts through Ovid or EBSCO.</li>
+</ul>
+<p>Google Scholar is for quick scoping only, not a search of record, because it offers no reproducible Boolean field search and no clean export.</p>
+<h1 id="when-to-add-mesh-pubmed">8. When to add MeSH (PubMed)</h1>
+<p>For a thorough PubMed search, pair each idea’s free-text terms with its MeSH heading. With PubMed turned on, click “Suggest MeSH headings”, then click the headings that fit each concept; QueryBee adds them as “Heading”[MeSH] beside your free-text terms. MeSH is biomedical, so agriculture, engineering, and education terms often have no heading, which is expected, and the free-text terms still cover those.</p>
+<h1 id="a-worked-example-start-to-finish">9. A worked example, start to finish</h1>
+<p>Topic: deep learning for detecting plant leaf disease from images.</p>
+<p>Three concepts:</p>
+<ul>
+<li>Method: “deep learning” OR “convolutional neural network” OR CNN OR “transfer learning” OR “neural network”</li>
+<li>Problem: “leaf disease” OR “plant disease” OR “crop disease” OR “foliar disease”</li>
+<li>Data: image OR imaging OR “computer vision” OR photograph*</li>
+</ul>
+<p>Build the query, copy the Scopus, Web of Science, and IEEE strings, and run them. Paste two papers you know are relevant into the recall check. If one is missed on the Data concept, add “RGB image” to that block and re-check. When nothing relevant is missed, export the search record and run the final searches.</p>
+<h1 id="common-mistakes-to-avoid">10. Common mistakes to avoid</h1>
+<ul>
+<li>One giant concept with everything joined by OR and no AND structure. The search becomes too broad.</li>
+<li>Too many concepts. A relevant paper that omits one facet’s keyword is lost.</li>
+<li>Only one spelling, or only the abbreviation. Half the literature is hidden.</li>
+<li>Over-truncation. The results fill with unrelated records.</li>
+<li>Searching a single database. The search is incomplete by construction.</li>
+<li>Judging a paper from its title and abstract. Always read the full text before you cite it.</li>
+</ul>
+<p>The tool keeps the syntax correct and identical every time. Your job is the vocabulary and the concept structure. Spend your effort there, verify with the recall check, and record what you did so the search is reportable.</p>
+</body>
+</html>
