@@ -3,9 +3,13 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20733036.svg)](https://doi.org/10.5281/zenodo.20733036)
 
 A single static HTML file that helps a researcher turn a topic into correctly fielded,
-fully parenthesized Boolean search strings for **Scopus**, **Web of Science**, **Google
-Scholar**, and **PubMed**, plus discovery link-outs to open-access, thesis, and book sources.
-It runs entirely in the browser. No account, API key, or server is required.
+fully parenthesized Boolean search strings for **ten databases**: Scopus, Web of Science,
+PubMed, and Google Scholar, plus the specialist engines IEEE Xplore, ACM Digital Library,
+ERIC, Ovid (Embase, PsycINFO, MEDLINE, CAB Abstracts), EBSCOhost (CINAHL, Business Source,
+SocINDEX, MLA, CAB), and Engineering Village (Compendex, Inspec, GeoRef). For PubMed it can
+also add MeSH headings from the NLM service. It includes discovery link-outs to open-access,
+thesis, and book sources, and runs entirely in the browser. No account, API key, or server is
+required.
 
 The tool separates two jobs that are usually mixed together:
 
@@ -53,6 +57,16 @@ There is nothing to install and nothing to configure.
 3. Copy the query for each database, or follow the Google Scholar and PubMed links directly.
 4. Optionally pick a narrower angle to run another pass.
 
+## Documentation
+
+- `User-Manual.pdf` (also `.md` and `.html`): the full manual, covering the workflow, every
+  database, MeSH, privacy, troubleshooting, and how to cite.
+- `Effective-Searching.pdf`: a short guide to building a good search, with a worked example.
+- `Subject-Playbooks.pdf`: per-field recipes (which databases to combine, the controlled
+  vocabulary to add, term tips, and common mistakes) for medicine, plant and agricultural
+  science, ecology, engineering and computer science, education, psychology, business, and
+  chemistry.
+
 ## What is genuinely new here, and what is not
 
 This is an integration and packaging contribution, not a new method. Stated plainly so that
@@ -73,9 +87,9 @@ no reviewer has to point it out:
 What this tool combines that, to our knowledge, is not available in one place: a zero-install
 single file, with no account or API key, that (a) bridges to whatever chatbot the user
 already has through copy-paste rather than a paid API, (b) mines OpenAlex live in the browser
-for any field, and (c) assembles correctly fielded queries for four databases with per-engine
-date and document-type translation. The contribution is the low-barrier combination, not any
-single component.
+for any field, and (c) assembles correctly fielded queries for ten databases through their
+platforms, with per-engine date and document-type translation and optional MeSH headings for
+PubMed. The contribution is the low-barrier combination, not any single component.
 
 ## Development
 
@@ -104,12 +118,15 @@ API suitable for automated query validation (Scholar's terms of service forbid i
 ### Repository layout
 
 ```
-index.html      the tool (the single distributed file)
-test/query-builder.test.js   automated tests
-test/load-core.js            test harness: extracts and runs the tool's core
-benchmark/topics.json        32 benchmark topics across 32 fields
-benchmark/run-benchmark.js   validity benchmark runner
-benchmark/RESULTS.md         latest benchmark output
+index.html                          the tool (the single distributed file)
+User-Manual.(md|html|pdf)           the full user manual
+Effective-Searching.(md|html|pdf)   short guide to building a good search
+Subject-Playbooks.(md|html|pdf)     per-field database recipes
+test/query-builder.test.js          automated tests
+test/load-core.js                   test harness: extracts and runs the tool's core
+benchmark/topics.json               32 benchmark topics across 32 fields
+benchmark/run-benchmark.js          validity benchmark runner
+benchmark/RESULTS.md                latest benchmark output
 ```
 
 The effectiveness evaluation (protocol, scoring code, gold-standard data) and the paper draft
@@ -119,8 +136,10 @@ are developed in a separate manuscript workspace and are not part of this releas
 
 Across 32 topics in 32 fields (128 generated queries), every query passed structural
 validation for all four engines, and every query that could be executed live ran without a
-syntax error (PubMed 32/32, Scopus 32/32). This supports only the claim that the tool
-produces valid, executable, correctly fielded queries. It does not measure retrieval
+syntax error (PubMed 32/32, Scopus 32/32). The six specialist-database builders (IEEE Xplore,
+ACM, ERIC, Ovid, EBSCOhost, and Engineering Village) were added after this benchmark and are
+covered by the unit test suite. This supports only the claim that the tool produces valid,
+executable, correctly fielded queries. It does not measure retrieval
 effectiveness; that is the subject of a separate effectiveness evaluation, in progress. See
 `benchmark/RESULTS.md` for the full report.
 
@@ -139,9 +158,10 @@ effectiveness; that is the subject of a separate effectiveness evaluation, in pr
 - The Google Scholar query is for scoping, not a search of record. Results cannot be exported,
   Boolean handling is limited, and stem truncation is not supported (the tool removes the
   asterisk for that panel).
-- PubMed coverage is title and abstract only (`[tiab]`), with no MeSH expansion, which reduces
-  recall relative to a full PubMed strategy, and PubMed covers only biomedicine and the life
-  sciences.
+- The specialist-database queries are free-text title and abstract only and do not include each
+  platform's controlled vocabulary (Emtree, the APA Thesaurus, the CAB or CINAHL headings). The
+  exception is PubMed, where MeSH headings can be added from the NLM service. PubMed itself
+  covers only biomedicine and the life sciences.
 - The tool depends on external services (OpenAlex, with a Datamuse fallback) and on database
   syntaxes that change over time, which is a maintenance burden.
 
