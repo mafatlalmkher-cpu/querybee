@@ -291,6 +291,13 @@
             <button class="toggle on" data-dt="Review">Review</button>
             <button class="toggle" data-dt="Conference paper">Conference paper</button>
             <button class="toggle" data-dt="Book chapter">Book chapter</button>
+            <button class="toggle" data-dt="Book">Book</button>
+            <button class="toggle" data-dt="Editorial">Editorial</button>
+            <button class="toggle" data-dt="Letter">Letter</button>
+            <button class="toggle" data-dt="Note">Note</button>
+            <button class="toggle" data-dt="Short survey">Short survey</button>
+            <button class="toggle" data-dt="Data paper">Data paper</button>
+            <button class="toggle" data-dt="Erratum">Erratum</button>
           </div>
         </div>
         <div class="fgroup">
@@ -512,8 +519,8 @@
 
   var state = { concepts: [], narrower: [], focus: null };
 
-  var SCOPUS_DT = { "Article":"ar", "Review":"re", "Conference paper":"cp", "Book chapter":"ch" };
-  var WOS_DT     = { "Article":"Article", "Review":"Review", "Conference paper":"Proceedings Paper", "Book chapter":"Book Chapter" };
+  var SCOPUS_DT = { "Article":"ar", "Review":"re", "Conference paper":"cp", "Book chapter":"ch", "Book":"bk", "Editorial":"ed", "Letter":"le", "Note":"no", "Short survey":"sh", "Data paper":"dp", "Erratum":"er" };
+  var WOS_DT     = { "Article":"Article", "Review":"Review", "Conference paper":"Proceedings Paper", "Book chapter":"Book Chapter", "Book":"Book", "Editorial":"Editorial Material", "Letter":"Letter", "Data paper":"Data Paper", "Erratum":"Correction" };
 
   var EXAMPLES = {
     virus:"Eliminating grapevine leafroll-associated virus 3 from infected grapevines using thermotherapy combined with meristem tip culture, with confirmation of virus-free status by RT-qPCR.",
@@ -583,7 +590,7 @@
       if(y.from!=null) q+=" AND PUBYEAR > "+(y.from-1);
       if(y.to!=null)   q+=" AND PUBYEAR < "+(y.to+1);
     }
-    if(dts&&dts.length){ q+=" AND DOCTYPE("+dts.map(function(x){return SCOPUS_DT[x];}).join(" OR ")+")"; }
+    var sdt=(dts||[]).map(function(x){return SCOPUS_DT[x];}).filter(Boolean); if(sdt.length){ q+=" AND DOCTYPE("+sdt.join(" OR ")+")"; }
     return q;
   }
   function buildWoS(blocks, y, dts){
@@ -594,7 +601,7 @@
       else if(y.from!=null)        q+=" AND PY=("+y.from+"-2100)";
       else if(y.to!=null)          q+=" AND PY=(1800-"+y.to+")";
     }
-    if(dts&&dts.length){ q+=" AND DT=("+dts.map(function(x){return WOS_DT[x];}).join(" OR ")+")"; }
+    var wdt=(dts||[]).map(function(x){return WOS_DT[x];}).filter(Boolean); if(wdt.length){ q+=" AND DT=("+wdt.join(" OR ")+")"; }
     return q;
   }
   // Google Scholar's asterisk is a whole-word placeholder, not character truncation, so a
@@ -620,7 +627,7 @@
     }
     return { q:q, url:"https://scholar.google.com/scholar?"+params };
   }
-  var PUBMED_PT = { "Article":'"Journal Article"', "Review":"Review" };
+  var PUBMED_PT = { "Article":'"Journal Article"', "Review":"Review", "Editorial":"Editorial", "Letter":"Letter", "Erratum":'"Published Erratum"' };
   // PubMed cannot truncate inside a quoted phrase, so the asterisk is removed when a term
   // is a multi-word phrase; single-word stems keep the wildcard, where PubMed allows it.
   function pubmedTerm(t){

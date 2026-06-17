@@ -11,6 +11,7 @@ All notable changes to this project are documented here. The format follows
 - Rewrote the User Manual as a comprehensive reference (time-saving rationale, browser guidance, by-field database selection, do's and don'ts, expanded troubleshooting). Added two companion guides: "Searching effectively with QueryBee" and "Subject Playbooks" (per-field recipes). Updated the README to ten databases with a documentation list.
 - Added a .nojekyll file so GitHub Pages serves the static tool directly.
 - Term mining ("find terms in literature") now uses OpenAlex's polite pool by sending a contact email, which fixes intermittent mining failures caused by shared-pool rate limiting.
+- Expanded the document-type filter from four to eleven types (added Book, Editorial, Letter, Note, Short survey, Data paper, and Erratum). Each maps to Scopus, Web of Science, and PubMed where that engine supports it and is dropped where it does not, with no empty filter clause left behind.
 - Wired the Zenodo DOI 10.5281/zenodo.20733036 into CITATION, the README badge, and the manual.
 
 No change to the query-building engine or the test suite (still 21 tests).
