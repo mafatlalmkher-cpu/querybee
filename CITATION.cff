@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "QueryBee: a single-file, browser-based fielded Boolean query builder for literature search"
+abstract: >-
+  A single static HTML file that helps a researcher turn a topic into correctly fielded,
+  fully parenthesized Boolean search strings for Scopus, Web of Science, Google Scholar, and
+  PubMed. Concept-term expansion (via the user's own AI assistant or by mining the OpenAlex
+  literature) is separated from deterministic, per-engine query assembly. No account, API
+  key, or server is required.
+type: software
+version: "1.2.0"
+date-released: "2026-06-16"
+license: MIT
+repository-code: "https://github.com/mafatlalmkher-cpu/querybee"
+authors:
+  - family-names: "Kher"
+    given-names: "Mafatlal M."
+    orcid: "https://orcid.org/0000-0001-5600-0040"
+    affiliation: "Ariel University"
+keywords:
+  - literature search
+  - systematic review
+  - Boolean query
+  - search strategy
+  - Scopus
+  - Web of Science
+  - PubMed
+  - OpenAlex

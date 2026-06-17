@@ -1,0 +1,25 @@
+{
+  "name": "querybee",
+  "version": "1.2.0",
+  "description": "Single-file, browser-based Boolean and fielded literature-search query builder for Scopus, Web of Science, Google Scholar and PubMed.",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:e2e": "playwright test",
+    "benchmark": "node benchmark/run-benchmark.js"
+  },
+  "keywords": [
+    "literature-search",
+    "systematic-review",
+    "boolean-query",
+    "scopus",
+    "web-of-science",
+    "pubmed",
+    "google-scholar",
+    "openalex"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

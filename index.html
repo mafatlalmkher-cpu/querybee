@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueryBee: fielded Boolean search queries for Scopus, Web of Science, PubMed, and Google Scholar</title>
+<meta name="description" content="Free, no-login browser tool that turns a research topic into correctly fielded, fully parenthesized Boolean search queries for Scopus, Web of Science, Google Scholar, and PubMed. Concept-term expansion is kept separate from deterministic, per-engine query assembly.">
+<meta name="author" content="Mafatlal Kher">
+<link rel="canonical" href="https://example.org/query-builder/"><!-- TODO: set to the published URL after hosting/repo -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="QueryBee: fielded Boolean search queries for four databases">
+<meta property="og:description" content="Build a literature search, see what it misses, and fix it. Free, runs entirely in your browser, no account or API key.">
+<meta property="og:url" content="https://example.org/query-builder/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="QueryBee: fielded Boolean search queries for four databases">
+<meta name="twitter:description" content="Free, browser-based, no-login Boolean query builder for Scopus, Web of Science, Google Scholar, and PubMed.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "QueryBee",
+  "applicationCategory": "ResearchApplication",
+  "operatingSystem": "Any (modern web browser)",
+  "url": "https://example.org/query-builder/",
+  "description": "A free, single-file, browser-based tool that builds correctly fielded Boolean literature-search queries for Scopus, Web of Science, Google Scholar, and PubMed, separating concept-term expansion from deterministic per-engine query assembly.",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Mafatlal Kher" }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF8F3; --paper-2:#F4EEE3;
+    --ink:#211C16; --ink-soft:#6A5F52; --ink-faint:#9A8F80;
+    --rule:#E6DDCE; --rule-strong:#D8CCB8;
+    --scopus:#C2611A; --scopus-deep:#9C4D12; --scopus-bg:#FBEEE1;
+    --wos:#4B2E83; --wos-deep:#3A2266; --wos-bg:#ECE6F5;
+    --scholar:#2A6F4E; --scholar-deep:#1E5439; --scholar-bg:#E4F0E9;
+    --pubmed:#1A6BA6; --pubmed-deep:#124E7A; --pubmed-bg:#E2EFF7;
+    --go:#16695C; --go-deep:#0F4C42; --danger:#B23A2E;
+    --shadow:0 1px 2px rgba(33,28,22,.06),0 8px 28px rgba(33,28,22,.06);
+    --shadow-lift:0 2px 6px rgba(33,28,22,.10),0 18px 44px rgba(33,28,22,.10);
+  }
+  *{box-sizing:border-box}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--go);outline-offset:2px}
+  .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 10% -5%, rgba(194,97,26,.05), transparent 36%),
+      radial-gradient(circle at 90% 0%, rgba(75,46,131,.05), transparent 38%),
+      radial-gradient(circle at 50% 120%, rgba(42,111,78,.045), transparent 40%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 26px 90px}
+
+  header.top{padding:46px 0 26px;border-bottom:1px solid var(--rule);margin-bottom:32px}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:14px;opacity:0;animation:rise .7s .05s ease forwards}
+  h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(32px,5vw,54px);line-height:1.03;letter-spacing:-.01em;margin:0 0 16px;max-width:17ch;opacity:0;animation:rise .7s .12s ease forwards}
+  h1 .amp{font-style:italic;font-weight:400;color:var(--ink-soft)}
+  .lede{font-size:17px;color:var(--ink-soft);max-width:64ch;margin:0;opacity:0;animation:rise .7s .2s ease forwards}
+  .lede b{color:var(--ink);font-weight:600}
+  .tag-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;opacity:0;animation:rise .7s .28s ease forwards}
+  .db-tag{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;border:1px solid}
+  .db-tag::before{content:"";width:8px;height:8px;border-radius:50%}
+  .db-tag.s{color:var(--scopus-deep);border-color:#E8C9A8;background:var(--scopus-bg)} .db-tag.s::before{background:var(--scopus)}
+  .db-tag.w{color:var(--wos-deep);border-color:#CDBEE8;background:var(--wos-bg)} .db-tag.w::before{background:var(--wos)}
+  .db-tag.g{color:var(--scholar-deep);border-color:#B9D9C7;background:var(--scholar-bg)} .db-tag.g::before{background:var(--scholar)}
+  .db-tag.free{color:var(--ink-soft);border-color:var(--rule-strong);background:#fff} .db-tag.free::before{display:none}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  .step{margin-bottom:38px}
+  .step-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+  .step-num{font-family:"Fraunces",serif;font-size:15px;font-weight:600;color:var(--paper);background:var(--ink);width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transform:translateY(3px)}
+  .step-num.opt{background:#fff;color:var(--ink);border:1.5px solid var(--rule-strong);font-size:11px}
+  .step-title{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:-.01em;margin:0}
+  .opt-pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--scholar-deep);background:var(--scholar-bg);border:1px solid #B9D9C7;border-radius:999px;padding:2px 9px;margin-left:8px;transform:translateY(-2px);display:inline-block}
+  .step-sub{color:var(--ink-soft);font-size:14px;margin:3px 0 0 39px}
+
+  .panel{background:#fff;border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow)}
+  .input-panel{padding:22px}
+  textarea#topic{width:100%;min-height:104px;resize:vertical;border:1px solid var(--rule-strong);border-radius:11px;padding:15px 16px;font-family:inherit;font-size:16px;color:var(--ink);background:var(--paper);line-height:1.5;transition:border-color .15s,box-shadow .15s}
+  textarea#topic:focus{outline:none;border-color:var(--go);box-shadow:0 0 0 3px rgba(22,105,92,.13)}
+  textarea#topic::placeholder{color:var(--ink-faint)}
+  .ex-row{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .ex-row .lbl{font-size:12.5px;color:var(--ink-faint);font-weight:600;margin-right:2px}
+  .ex-btn{background:none;border:1px solid var(--rule-strong);border-radius:999px;padding:5px 12px;font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;transition:all .14s}
+  .ex-btn:hover{border-color:var(--go);color:var(--go-deep)}
+
+  .filters{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin-top:20px;padding-top:20px;border-top:1px dashed var(--rule-strong)}
+  .fgroup{display:flex;flex-direction:column;gap:8px}
+  .flabel{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+  .year-row{display:flex;align-items:center;gap:8px}
+  .year-row input{width:78px;border:1px solid var(--rule-strong);border-radius:8px;padding:8px 10px;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--ink);background:var(--paper)}
+  .year-row input:focus{outline:none;border-color:var(--go)}
+  .year-row span{color:var(--ink-faint);font-size:14px}
+  .chiprow{display:flex;flex-wrap:wrap;gap:8px}
+  .toggle{font-size:13.5px;font-weight:500;padding:7px 13px;border-radius:999px;border:1px solid var(--rule-strong);background:var(--paper);color:var(--ink-soft);cursor:pointer;user-select:none;transition:all .14s}
+  .toggle:hover{border-color:var(--ink-faint)}
+  .toggle.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  .toggle.db.on[data-db="Scopus"]{background:var(--scopus);border-color:var(--scopus)}
+  .toggle.db.on[data-db="WoS"]{background:var(--wos);border-color:var(--wos)}
+  .toggle.db.on[data-db="Scholar"]{background:var(--scholar);border-color:var(--scholar)}
+
+  /* prompt-bridge */
+  .bridge{padding:20px 22px;margin-top:0}
+  .bridge .how{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.55}
+  .bridge .how b{color:var(--ink);font-weight:600}
+  pre.prompt{margin:0;background:#FCFAF6;border:1px solid var(--rule-strong);border-radius:11px;padding:15px 16px;font-family:"JetBrains Mono",monospace;font-size:12.6px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--ink);max-height:300px;overflow:auto}
+  .bridge-foot{display:flex;align-items:center;gap:14px;margin-top:13px;flex-wrap:wrap}
+  .where{font-size:12.5px;color:var(--ink-faint)}
+  .where b{color:var(--ink-soft);font-weight:600}
+
+  button.primary{font-family:inherit;font-weight:600;font-size:14.5px;color:#fff;background:var(--go);border:none;border-radius:10px;padding:11px 22px;cursor:pointer;box-shadow:0 1px 2px rgba(15,76,66,.3);transition:transform .12s,background .14s,box-shadow .14s;display:inline-flex;align-items:center;gap:8px}
+  button.primary:hover{background:var(--go-deep);transform:translateY(-1px);box-shadow:0 4px 14px rgba(15,76,66,.26)}
+  button.primary:active{transform:translateY(0)}
+  button.ghost{font-family:inherit;font-weight:600;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:10px;padding:10px 18px;cursor:pointer;transition:all .14s}
+  button.ghost:hover{border-color:var(--ink-faint)}
+
+  /* reply + concepts */
+  .reply-panel{padding:20px 22px}
+  textarea#aiReply{width:100%;min-height:96px;resize:vertical;border:1px solid var(--rule-strong);border-radius:11px;padding:13px 15px;font-family:"JetBrains Mono",monospace;font-size:12.8px;color:var(--ink);background:var(--paper);line-height:1.55}
+  textarea#aiReply:focus{outline:none;border-color:var(--go);box-shadow:0 0 0 3px rgba(22,105,92,.13)}
+  textarea#aiReply::placeholder{color:var(--ink-faint);font-family:"Hanken Grotesk",sans-serif;font-size:13.5px}
+  .reply-foot{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+  .reply-note{font-size:12.5px;color:var(--ink-faint);max-width:40ch}
+  .parse-msg{display:none;margin-top:11px;font-size:13px;border-radius:9px;padding:9px 13px}
+  .parse-msg.ok{display:block;background:var(--scholar-bg);border:1px solid #B9D9C7;color:var(--scholar-deep)}
+  .parse-msg.bad{display:block;background:#FBEDEB;border:1px solid #E6C2BC;color:var(--danger)}
+
+  .concept{background:#fff;border:1px solid var(--rule);border-radius:13px;padding:15px 16px 16px;margin-bottom:13px;box-shadow:var(--shadow)}
+  .concept-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .concept-dot{font-family:"Fraunces",serif;font-style:italic;color:var(--ink-faint);font-size:15px;flex:0 0 auto;min-width:20px}
+  input.concept-label{flex:1;font-family:"Fraunces",serif;font-weight:600;font-size:18px;color:var(--ink);border:none;border-bottom:1.5px solid transparent;background:none;padding:2px 0}
+  input.concept-label:focus{outline:none;border-bottom-color:var(--rule-strong)}
+  .mini{background:none;border:1px solid var(--rule-strong);border-radius:7px;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:12px;padding:5px 9px;transition:all .14s}
+  .mini:hover{border-color:var(--go);color:var(--go-deep)}
+  .concept-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;line-height:1;padding:4px;border-radius:6px;transition:color .14s,background .14s}
+  .concept-del:hover{color:var(--danger);background:#FBEDEB}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:13px;background:var(--paper-2);border:1px solid var(--rule-strong);border-radius:7px;padding:5px 6px 5px 10px;color:var(--ink)}
+  .chip button{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;line-height:.8;padding:0 2px;border-radius:4px;transition:color .12s}
+  .chip button:hover{color:var(--danger)}
+  input.add-term{font-family:"JetBrains Mono",monospace;font-size:13px;border:1px dashed var(--rule-strong);border-radius:7px;padding:5px 10px;background:none;color:var(--ink);min-width:150px}
+  input.add-term:focus{outline:none;border-color:var(--go);border-style:solid}
+  input.add-term::placeholder{color:var(--ink-faint);font-style:italic}
+  .suggest-wrap{margin-top:10px}
+  .suggest-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .sg{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#fff;border:1px dashed var(--go);color:var(--go-deep);border-radius:7px;padding:4px 9px;cursor:pointer;transition:all .12s}
+  .sg:hover{background:var(--scholar-bg)}
+  .sg-note{font-size:12px;color:var(--ink-faint);margin-top:6px}
+  .add-concept{margin-top:4px;background:none;border:1px dashed var(--rule-strong);border-radius:9px;padding:9px 15px;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:500;transition:all .14s}
+  .add-concept:hover{border-color:var(--go);color:var(--go-deep)}
+
+  .palette{margin-top:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:12px;padding:15px 16px}
+  .palette h4{font-family:"Fraunces",serif;font-weight:600;font-size:14.5px;margin:0 0 4px}
+  .palette p{font-size:12.5px;color:var(--ink-soft);margin:0 0 11px}
+  .palette-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .pal-btn{background:#fff;border:1px solid var(--rule-strong);border-radius:9px;padding:8px 13px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;transition:all .14s}
+  .pal-btn:hover{border-color:var(--go);color:var(--go-deep);transform:translateY(-1px);box-shadow:var(--shadow)}
+
+  .queries{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.queries{grid-template-columns:1fr}}
+  .qcard{border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--rule);background:#fff;display:flex;flex-direction:column}
+  .qcard.hide{display:none}
+  .qbar{height:5px}
+  .qcard.s .qbar{background:var(--scopus)} .qcard.w .qbar{background:var(--wos)} .qcard.g .qbar{background:var(--scholar)}
+  .qhead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 11px}
+  .qname{display:flex;flex-direction:column;gap:1px}
+  .qname .db{font-family:"Fraunces",serif;font-weight:600;font-size:18px}
+  .qcard.s .qname .db{color:var(--scopus-deep)} .qcard.w .qname .db{color:var(--wos-deep)} .qcard.g .qname .db{color:var(--scholar-deep)}
+  .qname .mode{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em}
+  .copy{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid;transition:all .14s;background:#fff}
+  .qcard.s .copy{color:var(--scopus-deep);border-color:#E3C09C} .qcard.s .copy:hover{background:var(--scopus-bg)}
+  .qcard.w .copy{color:var(--wos-deep);border-color:#C9B8E6} .qcard.w .copy:hover{background:var(--wos-bg)}
+  .qcard.g .copy{color:var(--scholar-deep);border-color:#B9D9C7} .qcard.g .copy:hover{background:var(--scholar-bg)}
+  .copy.done{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important}
+  pre.qstr{margin:0;padding:0 16px 12px;font-family:"JetBrains Mono",monospace;font-size:12.7px;line-height:1.65;white-space:pre-wrap;word-break:break-word;color:var(--ink);flex:1}
+  pre.qstr .fld{font-weight:500}
+  .qcard.s pre.qstr .fld{color:var(--scopus-deep)} .qcard.w pre.qstr .fld{color:var(--wos-deep)}
+  pre.qstr .op{color:var(--ink-faint);font-weight:500}
+  .qmeta{padding:0 16px 10px;font-size:11.5px;color:var(--ink-faint)}
+  .qmeta.warn{color:var(--danger)}
+  .qfoot{padding:11px 16px;border-top:1px solid var(--rule);background:var(--paper);font-size:12.5px}
+  .qfoot a{text-decoration:underline;text-underline-offset:2px}
+  .qcard.s .qfoot a{color:var(--scopus-deep)} .qcard.w .qfoot a{color:var(--wos-deep)} .qcard.g .qfoot a{color:var(--scholar-deep)}
+  .qcard.p .qbar{background:var(--pubmed)}
+  .qcard.p .qname .db{color:var(--pubmed-deep)}
+  .qcard.p .copy{color:var(--pubmed-deep);border-color:#A9CBE3} .qcard.p .copy:hover{background:var(--pubmed-bg)}
+  .qcard.p pre.qstr .fld{color:var(--pubmed-deep)}
+  .qcard.p .qfoot a{color:var(--pubmed-deep)}
+  .mesh{margin-top:10px;border-top:1px dashed var(--rule-strong);padding-top:9px}
+  .mesh-top{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
+  .mesh-btn{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+  .mesh-btn:hover{background:var(--pubmed-bg)}
+  .mesh-hint{font-size:11.5px;line-height:1.45;color:var(--ink-faint);flex:1;min-width:200px}
+  .mesh-hint code{background:var(--pubmed-bg);color:var(--pubmed-deep);padding:0 3px;border-radius:3px;font-size:11px}
+  .mesh-sug{margin-top:9px;display:flex;flex-direction:column;gap:8px}
+  .meshlab{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+  .meshchips{display:flex;flex-wrap:wrap;gap:5px}
+  .meshchip{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:12px;padding:2px 10px;cursor:pointer}
+  .meshchip:hover{background:var(--pubmed-bg)}
+  .meshchip.on{background:var(--pubmed);color:#fff;border-color:var(--pubmed)}
+  .meshmsg{font-size:12px;color:var(--ink-faint)}
+  .meshmsg.warn{color:#9a6a00}
+
+  .morewrap{margin-top:18px;background:#fff;border:1px solid var(--rule);border-radius:13px;padding:18px 20px;box-shadow:var(--shadow)}
+  .morewrap h4{font-family:"Fraunces",serif;font-weight:600;font-size:15.5px;margin:0 0 5px}
+  .morewrap p{font-size:13px;color:var(--ink-soft);margin:0 0 14px;line-height:1.55;max-width:74ch}
+  .more-group{margin-bottom:13px}
+  .more-group:last-child{margin-bottom:0}
+  .more-label{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;display:block;margin-bottom:8px}
+  .more-links{display:flex;flex-wrap:wrap;gap:8px}
+  .more-links a{font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);background:var(--paper-2);border:1px solid var(--rule-strong);border-radius:8px;padding:7px 13px;text-decoration:none;transition:all .14s;display:inline-flex;align-items:center;gap:6px}
+  .more-links a:hover{border-color:var(--go);color:var(--go-deep);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .more-links a.off{opacity:.4;pointer-events:none}
+
+  .qnote{margin-top:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:12px;padding:15px 18px}
+  .qnote h4{font-family:"Fraunces",serif;font-weight:600;font-size:15px;margin:0 0 7px}
+  .qnote p{margin:0 0 8px;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
+  .qnote p:last-child{margin-bottom:0}
+  .qnote code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#fff;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--ink)}
+
+  .narrow-grid{display:flex;flex-wrap:wrap;gap:10px}
+  .narrow-chip{text-align:left;background:#fff;border:1px solid var(--rule-strong);border-radius:11px;padding:12px 15px;cursor:pointer;font-family:inherit;font-size:14px;color:var(--ink);transition:all .15s;box-shadow:var(--shadow);max-width:340px;display:flex;align-items:center;gap:10px}
+  .narrow-chip:hover{border-color:var(--go);transform:translateY(-1px);box-shadow:var(--shadow-lift)}
+  .narrow-chip .arr{color:var(--go);font-weight:700;flex:0 0 auto}
+  .empty-note{color:var(--ink-faint);font-size:14px}
+
+  footer.foot{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-faint);line-height:1.6}
+  footer.foot b{color:var(--ink-soft);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Literature Search · Methods Tool</div>
+    <h1>QueryBee <span class="amp">Boolean &amp; fielded query builder for any field</span></h1>
+    <p class="lede">Describe a topic, expand each concept into terms (with any free AI assistant, or by mining the literature), and the tool assembles correctly fielded, fully parenthesized search strings for <b>Scopus</b>, <b>Web of Science</b>, <b>Google Scholar</b>, and <b>PubMed</b> in each engine's own syntax. The syntax assembly is deterministic and field-agnostic. Treat it as a starting scaffold for a search, not a replacement for a librarian's strategy or for screening; the literature term suggestions are most reliable in well-indexed, English-language fields. No account, no key, no cost, and everything runs in your browser.</p>
+    <div class="tag-row">
+      <span class="db-tag s">Scopus · TITLE-ABS-KEY</span>
+      <span class="db-tag w">Web of Science · TS=</span>
+      <span class="db-tag g">Google Scholar · full text</span>
+      <span class="db-tag free">Free · works with any chatbot</span>
+    </div>
+    <details class="help" style="margin-top:18px;font-size:14px;color:var(--ink-soft)">
+      <summary style="cursor:pointer;font-weight:600;color:var(--ink)">New here? How to use this tool</summary>
+      <div style="margin-top:8px;line-height:1.6;max-width:74ch">
+        <b>1.</b> In step 1, type your topic and set the year range and which databases you want.<br>
+        <b>2.</b> Either copy the step 2 prompt into any free chatbot and paste its reply into step 3, or click a starter block and edit it. On any block, <b>find terms in literature</b> suggests synonyms ranked by how distinctive they are to your topic.<br>
+        <b>3.</b> Step 4 shows a ready-to-run query for each database; copy it into that database's advanced search. The review panel flags weak spots in your strategy.<br>
+        <b>4.</b> In step 6, paste a few papers you already know are relevant to see whether your search would find them, and which block to fix if it would miss one.<br>
+        <b>5.</b> In step 7, save or share the whole search, or export a record for your methods section.<br>
+        It is free, needs no account, and your search never leaves your browser. For a fuller explanation, see USER-GUIDE.md in the project folder.
+      </div>
+    </details>
+  </header>
+
+  <!-- STEP 1 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">1</span><h2 class="step-title">Describe your search</h2></div>
+    <p class="step-sub">A research question, a working title, or a few sentences of an abstract. Any scientific field.</p>
+    <div class="panel input-panel">
+      <textarea id="topic" aria-label="Describe your research topic" placeholder="e.g. Effect of microplastic exposure on freshwater fish gut microbiome composition and immune response"></textarea>
+      <div class="ex-row">
+        <span class="lbl">Try:</span>
+        <button class="ex-btn" data-ex="virus">grapevine virus elimination</button>
+        <button class="ex-btn" data-ex="ml">deep learning crop disease</button>
+        <button class="ex-btn" data-ex="cancer">tumor immunotherapy resistance</button>
+        <button class="ex-btn" data-ex="bat">solid-state battery electrolyte</button>
+      </div>
+
+      <div class="filters">
+        <div class="fgroup">
+          <span class="flabel">Publication years</span>
+          <div class="year-row"><input type="number" id="yearFrom" aria-label="Publication year from" value="2000" min="1800" max="2100"><span>to</span><input type="number" id="yearTo" aria-label="Publication year to" value="2026" min="1800" max="2100"></div>
+        </div>
+        <div class="fgroup">
+          <span class="flabel">Document types</span>
+          <div class="chiprow" id="doctypes">
+            <button class="toggle on" data-dt="Article">Article</button>
+            <button class="toggle on" data-dt="Review">Review</button>
+            <button class="toggle" data-dt="Conference paper">Conference paper</button>
+            <button class="toggle" data-dt="Book chapter">Book chapter</button>
+          </div>
+        </div>
+        <div class="fgroup">
+          <span class="flabel">Build queries for</span>
+          <div class="chiprow" id="dbtoggles">
+            <button class="toggle db on" data-db="Scopus">Scopus</button>
+            <button class="toggle db on" data-db="WoS">Web of Science</button>
+            <button class="toggle db on" data-db="Scholar">Google Scholar</button>
+            <button class="toggle db" data-db="PubMed">PubMed</button>
+            <button class="toggle db" data-db="IEEE">IEEE Xplore</button>
+            <button class="toggle db" data-db="ACM">ACM</button>
+            <button class="toggle db" data-db="ERIC">ERIC</button>
+            <button class="toggle db" data-db="Ovid">Ovid (Embase/PsycINFO)</button>
+            <button class="toggle db" data-db="EBSCO">EBSCO (CINAHL/...)</button>
+            <button class="toggle db" data-db="EngVillage">Engineering Village</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num opt">2</span><h2 class="step-title">Get terms from your AI assistant<span class="opt-pill">optional</span></h2></div>
+    <p class="step-sub">Works with the free version of Claude, ChatGPT, Gemini, or any chatbot. No AI account? Skip to step 3 and add terms by hand or load an example block.</p>
+    <div class="panel bridge">
+      <p class="how"><b>1.</b> Copy this prompt. <b>2.</b> Paste it into your AI assistant. <b>3.</b> Copy the assistant's full reply and paste it into step 3.</p>
+      <pre class="prompt" id="promptBox"></pre>
+      <p class="how" style="margin-top:10px;color:var(--ink-soft);font-size:13px">Tip: keep the CONCEPT and TERMS lines if you edit the prompt, ask for synonyms and variants rather than generic words, paste the reply straight back, and read the full paper before you cite it.</p>
+      <div class="bridge-foot">
+        <button class="primary" id="copyPrompt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          Copy prompt
+        </button>
+        <span class="where">Free chatbots that work: <b>claude.ai</b>, <b>chatgpt.com</b>, <b>gemini.google.com</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">3</span><h2 class="step-title">Concepts &amp; terms</h2></div>
+    <p class="step-sub">Paste the assistant's reply to fill the blocks, or build them by hand. Each block is one idea, joined internally with OR. On any block, use <b>find terms in literature</b> to pull candidate synonyms from real papers via OpenAlex. Edit anything and the queries update live.</p>
+    <div class="panel reply-panel">
+      <textarea id="aiReply" aria-label="Paste the AI assistant reply" placeholder="Paste the AI assistant's reply here, then press Build from reply. The tool reads the CONCEPT / TERMS / NARROWER lines (or JSON)."></textarea>
+      <div class="reply-foot">
+        <button class="primary" id="parseReply">Build from reply</button>
+        <button class="ghost" id="clearAll">Clear all</button>
+        <span class="reply-note">Nothing to paste? Add a block below or load a starter.</span>
+      </div>
+      <div class="parse-msg" id="parseMsg" role="status" aria-live="polite"></div>
+    </div>
+
+    <div id="concepts" style="margin-top:16px"></div>
+    <button class="add-concept" id="addConcept">+ Add a concept block</button>
+
+    <div class="palette">
+      <h4>Starter blocks (any field)</h4>
+      <p>Click to drop in a ready-made block, then edit. These show the pattern; the AI step in step 2 builds terms for any topic.</p>
+      <div class="palette-grid" id="palette"></div>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">4</span><h2 class="step-title">Your queries</h2></div>
+    <p class="step-sub">Copy into each database. Scopus and Web of Science need their Advanced Search; the Google Scholar link runs the search directly.</p>
+    <div class="queries">
+      <div class="qcard s" data-db="Scopus">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">Scopus</span><span class="mode">Advanced Search</span></div><button class="copy" data-target="scopusStr">Copy</button></div>
+        <pre class="qstr" id="scopusStr"></pre>
+        <div class="qfoot"><a href="https://www.scopus.com/search/form.uri?display=advanced" target="_blank" rel="noopener">Open Scopus Advanced Search ↗</a></div>
+      </div>
+      <div class="qcard w" data-db="WoS">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">Web of Science</span><span class="mode">Advanced Search · Query Builder</span></div><button class="copy" data-target="wosStr">Copy</button></div>
+        <pre class="qstr" id="wosStr"></pre>
+        <div class="qfoot"><a href="https://www.webofscience.com/wos/woscc/advanced-search" target="_blank" rel="noopener">Open Web of Science Advanced Search ↗</a></div>
+      </div>
+      <div class="qcard g" data-db="Scholar">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">Google Scholar</span><span class="mode">full-text search</span></div><button class="copy" data-target="scholarStr">Copy</button></div>
+        <pre class="qstr" id="scholarStr"></pre>
+        <div class="qmeta" id="scholarMeta"></div>
+        <div class="qfoot"><a id="scholarLink" href="https://scholar.google.com" target="_blank" rel="noopener">Search Google Scholar now ↗</a></div>
+      </div>
+      <div class="qcard p" data-db="PubMed">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">PubMed</span><span class="mode">field tags · biomedical only</span></div><button class="copy" data-target="pubmedStr">Copy</button></div>
+        <pre class="qstr" id="pubmedStr"></pre>
+        <div class="qmeta" id="pubmedMeta">Biomedical and life-sciences coverage. Not a substitute for the multidisciplinary engines on a general topic.</div>
+        <div class="qfoot"><a id="pubmedLink" href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" rel="noopener">Search PubMed now ↗</a></div>
+        <div class="mesh" id="meshPanel">
+          <div class="mesh-top">
+            <button type="button" class="mesh-btn" id="meshBtn">Suggest MeSH headings</button>
+            <span class="mesh-hint">Optional, needs internet. Click a heading to OR <code>"Heading"[MeSH]</code> into that concept. MeSH is biomedical; many agriculture, engineering, and education terms have no heading, and the free-text terms still cover them.</span>
+          </div>
+          <div id="meshSug" class="mesh-sug"></div>
+        </div>
+      </div>
+      <div class="qcard" data-db="IEEE">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">IEEE Xplore</span><span class="mode">Command Search · set the year in IEEE's filter</span></div><button class="copy" data-target="ieeeStr">Copy</button></div>
+        <pre class="qstr" id="ieeeStr"></pre>
+        <div class="qfoot"><a href="https://ieeexplore.ieee.org/search/advanced/command" target="_blank" rel="noopener">Open IEEE Command Search ↗</a></div>
+      </div>
+      <div class="qcard" data-db="ACM">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">ACM Digital Library</span><span class="mode">paste into Search Within · Abstract</span></div><button class="copy" data-target="acmStr">Copy</button></div>
+        <pre class="qstr" id="acmStr"></pre>
+        <div class="qfoot"><a href="https://dl.acm.org/search/advanced" target="_blank" rel="noopener">Open ACM Advanced Search ↗</a></div>
+      </div>
+      <div class="qcard" data-db="ERIC">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">ERIC</span><span class="mode">eric.ed.gov · education · set year in the filter</span></div><button class="copy" data-target="ericStr">Copy</button></div>
+        <pre class="qstr" id="ericStr"></pre>
+        <div class="qfoot"><a href="https://eric.ed.gov/?advanced" target="_blank" rel="noopener">Open ERIC Advanced Search ↗</a></div>
+      </div>
+      <div class="qcard" data-db="Ovid">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">Ovid</span><span class="mode">Embase / PsycINFO / MEDLINE / CAB</span></div><button class="copy" data-target="ovidStr">Copy</button></div>
+        <pre class="qstr" id="ovidStr"></pre>
+        <div class="qmeta">Paste into Ovid Search. Free-text (.ti,ab,kf.) only; add Emtree or thesaurus terms yourself for full recall, and set the year via Ovid limits.</div>
+      </div>
+      <div class="qcard" data-db="EBSCO">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">EBSCOhost</span><span class="mode">CINAHL / Business Source / SocINDEX / CAB / MLA</span></div><button class="copy" data-target="ebscoStr">Copy</button></div>
+        <pre class="qstr" id="ebscoStr"></pre>
+        <div class="qmeta">Paste into the EBSCO Advanced Search box. Free-text (TI/AB) only; add subject headings yourself for full recall.</div>
+      </div>
+      <div class="qcard" data-db="EngVillage">
+        <div class="qbar"></div>
+        <div class="qhead"><div class="qname"><span class="db">Engineering Village</span><span class="mode">Compendex / Inspec / GeoRef · Expert Search</span></div><button class="copy" data-target="evStr">Copy</button></div>
+        <pre class="qstr" id="evStr"></pre>
+        <div class="qfoot"><a href="https://www.engineeringvillage.com" target="_blank" rel="noopener">Open Engineering Village ↗</a></div>
+      </div>
+    </div>
+
+    <div class="qnote">
+      <h4>Strategy review · PRESS / PRISMA-S</h4>
+      <p id="lintEmpty" style="margin:0;font-size:13.5px;color:var(--ink-soft)">Add concept blocks above and this panel flags gaps against peer-review-of-search criteria as you build.</p>
+      <div id="lintResults" aria-live="polite"></div>
+    </div>
+
+    <div class="morewrap">
+      <h4>Send the same search to more free sources</h4>
+      <p>These open with your concept query as a plain full-text search. They do not take fielded Boolean, so use them for discovery, not the systematic search of record. Build at least one concept block above to activate the links.</p>
+      <div class="more-group">
+        <span class="more-label">Open-access papers &amp; preprints</span>
+        <div class="more-links" id="moreOA"></div>
+      </div>
+      <div class="more-group">
+        <span class="more-label">Theses &amp; dissertations</span>
+        <div class="more-links" id="moreThesis"></div>
+      </div>
+      <div class="more-group">
+        <span class="more-label">Books</span>
+        <div class="more-links" id="moreBooks"></div>
+      </div>
+    </div>
+
+    <div class="qnote">
+      <h4>What the tool applies, and what to watch</h4>
+      <p>Each concept sits in its own field code and the blocks are joined only with <code>AND</code>, so operator precedence cannot regroup the logic. Keep that habit: precedence rules differ between engines and Scopus changed its order recently, so parenthesize every block rather than trusting defaults. Date and document-type filters are translated per engine: Scopus uses exclusive <code>PUBYEAR &gt; / &lt;</code> and codes such as <code>ar</code>, <code>re</code>; Web of Science uses an inclusive <code>PY=()</code> range and full names such as <code>Article</code>, <code>Review</code>, <code>Proceedings Paper</code>.</p>
+      <p>The two subscription databases will not return the same count. Web of Science <code>TS=</code> also searches Keyword Plus, index terms generated from the references a paper cites, which Scopus <code>TITLE-ABS-KEY</code> has no equivalent for. The gap is why searching both improves recall.</p>
+      <p>Google Scholar is different in kind. It searches full text, not separate title, abstract, and keyword fields, it has no document-type filter, it does not support stem truncation (its asterisk is a whole-word placeholder), and it cuts off queries beyond about 256 characters. The tool therefore removes truncation asterisks from the Scholar query, shows the character count, and warns when a Scholar query runs long. Treat Scholar as fast, free scoping, not the systematic search of record, and trim terms to the core concepts for that panel.</p>
+      <p>PubMed keeps real field tags, so the tool writes each term as <code>term[tiab]</code> for title and abstract, bounds the years with <code>("YYYY"[dp] : "YYYY"[dp])</code>, and maps document types it recognizes, <code>"Journal Article"[pt]</code> and <code>Review[pt]</code>; conference papers and book chapters have no clean PubMed type and are dropped from that panel. PubMed covers biomedicine and the life sciences only, so it returns little or nothing for topics outside that scope. The thesis, book, and open-access links search full text and are for discovery rather than a reproducible search of record.</p>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">5</span><h2 class="step-title">Narrow the topic</h2></div>
+    <p class="step-sub">Pick a sharper angle. The tool rewrites the step 2 prompt around it so you can run one more pass with your assistant.</p>
+    <div class="narrow-grid" id="narrowGrid"><span class="empty-note">Narrower angles appear here after you paste an AI reply in step 3.</span></div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">6</span><h2 class="step-title">Check what your search misses<span class="opt-pill">validate</span></h2></div>
+    <p class="step-sub">Paste a few papers you already know should be found, one per line, as a DOI, an OpenAlex ID, or a title. The tool fetches each from OpenAlex and tests whether your current concept blocks would retrieve it, and if not, which block to fix.</p>
+    <div class="panel reply-panel">
+      <textarea id="knownPapers" aria-label="Known relevant papers, one per line as DOI, OpenAlex ID, or title" placeholder="One per line, for example:&#10;10.1016/j.cell.2017.01.017&#10;Primary, adaptive, and acquired resistance to cancer immunotherapy"></textarea>
+      <div class="reply-foot">
+        <button class="primary" id="checkRecall">Check recall</button>
+        <span class="reply-note">Tested against each paper's title and abstract. Add a synonym to a missed block, then re-check.</span>
+      </div>
+      <div id="recallResults" style="margin-top:12px" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- STEP 7 -->
+  <section class="step">
+    <div class="step-head"><span class="step-num">7</span><h2 class="step-title">Save, share &amp; document<span class="opt-pill">reproducible</span></h2></div>
+    <p class="step-sub">Save the whole search to reopen or audit later, share it as a link, or export a PRISMA-S style search record for your methods section.</p>
+    <div class="panel bridge">
+      <div class="bridge-foot">
+        <button class="primary" id="shareLink">Copy shareable link</button>
+        <button class="ghost" id="exportRecord">Export search record (.md)</button>
+        <button class="ghost" id="exportJson">Download search (.json)</button>
+        <label class="ghost" style="cursor:pointer;display:inline-flex;align-items:center">Load search (.json)<input type="file" id="loadJson" accept="application/json,.json" aria-label="Load a saved search JSON file" class="visually-hidden"></label>
+      </div>
+      <p class="where" style="margin-top:11px">The shareable link encodes the entire search in the URL itself, so nothing is uploaded anywhere. The record lists each database, the search date, the full strings, the limits, and a place for record counts.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p><b>How it works.</b> The query syntax for each database is assembled by the tool itself, so the fielded structure is consistent and editable. The AI step only expands a topic into concept terms, and it runs in whatever chatbot you already use, so the tool needs no API key and costs nothing. Multi-word terms are quoted as phrases, and a trailing asterisk truncates word stems in Scopus, Web of Science, and PubMed. Google Scholar does not support stem truncation, so the asterisk is removed from the Scholar query automatically.</p>
+    <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external request is the optional find-terms helper, which mines candidate terms from the OpenAlex scholarly database (free, no account, no key) and falls back to a public dictionary or fails quietly when offline, so the core query builder always works.</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var state = { concepts: [], narrower: [], focus: null };
+
+  var SCOPUS_DT = { "Article":"ar", "Review":"re", "Conference paper":"cp", "Book chapter":"ch" };
+  var WOS_DT     = { "Article":"Article", "Review":"Review", "Conference paper":"Proceedings Paper", "Book chapter":"Book Chapter" };
+
+  var EXAMPLES = {
+    virus:"Eliminating grapevine leafroll-associated virus 3 from infected grapevines using thermotherapy combined with meristem tip culture, with confirmation of virus-free status by RT-qPCR.",
+    ml:"Deep learning models for automated detection and classification of crop leaf diseases from field images.",
+    cancer:"Mechanisms of acquired resistance to immune checkpoint inhibitor immunotherapy in solid tumors.",
+    bat:"Sulfide solid-state electrolytes for lithium metal batteries and their interfacial stability."
+  };
+
+  var PALETTE = [
+    { label:"Grapevine viruses", terms:['"grapevine leafroll"','GLRaV','"GLRaV-1"','"GLRaV-2"','"GLRaV-3"','"GLRaV-4"','"grapevine fanleaf virus"','GFLV','"arabis mosaic virus"','ArMV','"grapevine virus A"','GVA','"rupestris stem pitting"','GRSPaV','"grapevine red blotch virus"','GRBV'] },
+    { label:"Virus elimination", terms:['"virus elimination"','"virus-free"','"virus eradication"','thermotherapy','"heat therapy"','cryotherapy','"meristem culture"','"meristem tip"','"shoot tip culture"','"shoot apical meristem"','"somatic embryogenesis"','chemotherapy','ribavirin','electrotherapy'] },
+    { label:"Molecular detection", terms:['"RT-PCR"','"RT-qPCR"','"real-time PCR"','"quantitative PCR"','ELISA','"DAS-ELISA"','"high-throughput sequencing"','HTS','"next-generation sequencing"','"small RNA sequencing"','"RT-LAMP"','immunocapture','serological'] },
+    { label:"Plant tissue culture", terms:['"tissue culture"','micropropagation','"in vitro"','"shoot tip culture"','"meristem culture"','organogenesis','"somatic embryogenesis"','callus','"MS medium"','"Murashige and Skoog"','"shoot multiplication"','rooting','acclimatization','explant'] },
+    { label:"Plant growth regulators", terms:['"growth regulator"','cytokinin','auxin','BA','benzyladenine','TDZ','thidiazuron','kinetin','NAA','IBA','IAA','GA3','"gibberellic acid"','zeatin'] },
+    { label:"Salt / salinity stress", terms:['"salt tolerance"','"salinity tolerance"','"salt stress"','"NaCl stress"','"salinity stress"','"saline stress"','"salt resistance"','halotoleran*'] },
+    { label:"Genomics methods", terms:['"gene expression"','transgenic','overexpression','"transcription factor"','knockout','RNAi','CRISPR','"molecular marker"','SNP','transcriptom*','"RNA-seq"','"genome editing"','cas9','GWAS','"marker-assisted selection"','QTL','"candidate gene"'] },
+    { label:"Crop plants", terms:['plant','crop','rice','wheat','maize','tomato','barley','soybean','cotton','arabidopsis','sorghum','grape','grapevine','vitis','potato','"sugar beet"','brassica','chickpea','sunflower'] },
+    { label:"Powdery mildew", terms:['"powdery mildew"','"Erysiphe necator"','"Uncinula necator"','"downy mildew"','"Plasmopara viticola"','Botrytis','"grey mould"','"trunk disease"','Esca','"fungicide resistance"'] },
+    { label:"Wine & yeast", terms:['"Saccharomyces cerevisiae"','"wine yeast"','"non-Saccharomyces"','fermentation','"volatile compounds"','"aroma compounds"','must','"alcoholic fermentation"','malolactic','"Oenococcus oeni"'] },
+    { label:"Deep learning", terms:['"deep learning"','"machine learning"','"neural network"','"convolutional neural network"','CNN','transformer','"image classification"','"object detection"','"transfer learning"','"semantic segmentation"'] },
+    { label:"Microbiome", terms:['microbiome','microbiota','"16S rRNA"','metagenom*','"gut microbiota"','"microbial community"','"amplicon sequencing"','dysbiosis','"shotgun metagenomics"'] }
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  // A term stays bare only if it is a "safe" token: letters/digits with internal hyphens
+  // or dots and an optional single trailing truncation asterisk (for example PD-1,
+  // Li6PS5Cl, GLRaV-3, transcriptom*). Anything containing whitespace, or a character the
+  // database query grammars treat as syntax (such as ( ) > < & | : / + or an en dash), is
+  // wrapped in double quotes so the term is read as a literal and cannot break the
+  // surrounding Boolean structure.
+  var SAFE_BAREWORD = /^[A-Za-z0-9][A-Za-z0-9.\-]*\*?$/;
+  function normTerm(t){
+    t = String(t).trim();
+    if(!t) return "";
+    var quoted = t.charAt(0)==='"' && t.charAt(t.length-1)==='"';
+    if(quoted) return t;
+    if(SAFE_BAREWORD.test(t)) return t;
+    return '"' + t.replace(/"/g,"") + '"';
+  }
+  function selectedDocTypes(){ var o=[],n=document.querySelectorAll("#doctypes .toggle.on"); for(var i=0;i<n.length;i++)o.push(n[i].getAttribute("data-dt")); return o; }
+  function selectedDBs(){ var o=[],n=document.querySelectorAll("#dbtoggles .toggle.on"); for(var i=0;i<n.length;i++)o.push(n[i].getAttribute("data-db")); return o; }
+  function yearVals(){ var f=parseInt($("yearFrom").value,10),t=parseInt($("yearTo").value,10); if(isNaN(f))f=null; if(isNaN(t))t=null; return {from:f,to:t}; }
+
+  function blocksFromConcepts(concepts){
+    return (concepts||[]).map(function(c){ return (c.terms||[]).map(normTerm).filter(Boolean); }).filter(function(ts){ return ts.length>0; });
+  }
+  function blocksFor(){ return blocksFromConcepts(state.concepts); }
+  // MeSH headings chosen per concept, aligned 1:1 with blocksFor(): same concept order, same
+  // "has at least one free-text term" filter, so buildPubMed can match mesh[i] to block i.
+  function pubmedMeshFor(){
+    var out=[];
+    (state.concepts||[]).forEach(function(c){
+      if((c.terms||[]).map(normTerm).filter(Boolean).length) out.push((c.mesh||[]).slice());
+    });
+    return out;
+  }
+
+  // The four builders are pure: each takes prepared blocks (arrays of normalized terms), a
+  // {from,to} year object, and an array of document-type names, and returns a string. This
+  // keeps query assembly deterministic and unit-testable independent of the DOM.
+  function buildScopus(blocks, y, dts){
+    if(!blocks.length) return "";
+    var q=blocks.map(function(ts){ return "TITLE-ABS-KEY("+ts.join(" OR ")+")"; }).join(" AND ");
+    if(y){
+      if(y.from!=null) q+=" AND PUBYEAR > "+(y.from-1);
+      if(y.to!=null)   q+=" AND PUBYEAR < "+(y.to+1);
+    }
+    if(dts&&dts.length){ q+=" AND DOCTYPE("+dts.map(function(x){return SCOPUS_DT[x];}).join(" OR ")+")"; }
+    return q;
+  }
+  function buildWoS(blocks, y, dts){
+    if(!blocks.length) return "";
+    var q=blocks.map(function(ts){ return "TS=("+ts.join(" OR ")+")"; }).join(" AND ");
+    if(y){
+      if(y.from!=null&&y.to!=null) q+=" AND PY=("+y.from+"-"+y.to+")";
+      else if(y.from!=null)        q+=" AND PY=("+y.from+"-2100)";
+      else if(y.to!=null)          q+=" AND PY=(1800-"+y.to+")";
+    }
+    if(dts&&dts.length){ q+=" AND DT=("+dts.map(function(x){return WOS_DT[x];}).join(" OR ")+")"; }
+    return q;
+  }
+  // Google Scholar's asterisk is a whole-word placeholder, not character truncation, so a
+  // trailing-stem term such as transcriptom* will not truncate there. Strip wildcards for
+  // the Scholar panel and drop any duplicates that collapse together as a result.
+  function scholarTerm(t){
+    var phrase = t.charAt(0)==='"' && t.charAt(t.length-1)==='"';
+    var inner = (phrase ? t.slice(1,-1) : t).replace(/\*/g,"").trim();
+    if(!inner) return "";
+    return phrase ? '"'+inner+'"' : inner;
+  }
+  function buildScholar(blocks, y){
+    if(!blocks.length) return {q:"",url:"https://scholar.google.com"};
+    var q=blocks.map(function(ts){
+      var seen={}, out=[];
+      ts.forEach(function(t){ var s=scholarTerm(t), k=s.toLowerCase(); if(s&&!seen[k]){ seen[k]=1; out.push(s); } });
+      return "("+out.join(" OR ")+")";
+    }).join(" ");
+    var params="q="+encodeURIComponent(q);
+    if(y){
+      if(y.from!=null) params+="&as_ylo="+y.from;
+      if(y.to!=null)   params+="&as_yhi="+y.to;
+    }
+    return { q:q, url:"https://scholar.google.com/scholar?"+params };
+  }
+  var PUBMED_PT = { "Article":'"Journal Article"', "Review":"Review" };
+  // PubMed cannot truncate inside a quoted phrase, so the asterisk is removed when a term
+  // is a multi-word phrase; single-word stems keep the wildcard, where PubMed allows it.
+  function pubmedTerm(t){
+    if(t.charAt(0)==='"' && t.charAt(t.length-1)==='"'){ return '"'+t.slice(1,-1).replace(/\*/g,"")+'"'; }
+    return t;
+  }
+  // MeSH main headings (optional, user-selected) are OR-ed into each concept group as
+  // "Heading"[MeSH] beside the free-text [tiab] terms. mesh is an array aligned to blocks, so
+  // mesh[i] holds the descriptor labels chosen for block i. Choosing headings is a manual click,
+  // so the assembled string stays fully deterministic; nothing is injected automatically.
+  function meshTag(label){ return '"'+String(label).replace(/"/g,"").trim()+'"[MeSH]'; }
+  function buildPubMed(blocks, y, dts, mesh){
+    if(!blocks.length) return {q:"",url:"https://pubmed.ncbi.nlm.nih.gov"};
+    var q=blocks.map(function(ts,i){
+      var parts=ts.map(function(t){ return pubmedTerm(t)+"[tiab]"; });
+      var mh=(mesh&&mesh[i])||[];
+      mh.forEach(function(d){ if(d) parts.push(meshTag(d)); });
+      return "("+parts.join(" OR ")+")";
+    }).join(" AND ");
+    if(y){
+      if(y.from!=null&&y.to!=null) q+=" AND (\""+y.from+"\"[dp] : \""+y.to+"\"[dp])";
+      else if(y.from!=null)        q+=" AND (\""+y.from+"\"[dp] : \"3000\"[dp])";
+      else if(y.to!=null)          q+=" AND (\"1800\"[dp] : \""+y.to+"\"[dp])";
+    }
+    var pts=(dts||[]).map(function(x){ return PUBMED_PT[x]; }).filter(Boolean);
+    if(pts.length) q+=" AND ("+pts.map(function(p){ return p+"[pt]"; }).join(" OR ")+")";
+    return { q:q, url:"https://pubmed.ncbi.nlm.nih.gov/?term="+encodeURIComponent(q) };
+  }
+  // ---- Specialist-database builders (free-text, fielded). Year is set in each database's own
+  // UI filter, not in the query string. Controlled vocabularies (Emtree, APA Thesaurus, ERIC
+  // descriptors) are proprietary and not embedded; these emit free-text title/abstract queries. ----
+  function buildIEEE(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ return "("+ts.map(function(t){ return '("Document Title":'+t+' OR "Abstract":'+t+')'; }).join(" OR ")+")"; }).join(" AND ");
+  }
+  function buildERIC(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ return "("+ts.map(function(t){ return "title:"+t+" OR abstract:"+t; }).join(" OR ")+")"; }).join(" AND ");
+  }
+  function ovidTerm(t){ return t.replace(/\*/g,"$"); }
+  function buildOvid(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ return "("+ts.map(ovidTerm).join(" or ")+").ti,ab,kf."; }).join(" AND ");
+  }
+  function buildACM(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ return "("+ts.join(" OR ")+")"; }).join(" AND ");
+  }
+
+  function buildEBSCO(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ var o=ts.join(" OR "); return "(TI ("+o+") OR AB ("+o+"))"; }).join(" AND ");
+  }
+
+  function buildEngVillage(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ var o=ts.join(" OR "); return "((("+o+") WN TI) OR (("+o+") WN AB))"; }).join(" AND ");
+  }
+
+  // simple grouped query reused for full-text link-outs
+  function simpleQuery(blocks){
+    if(!blocks.length) return "";
+    return blocks.map(function(ts){ return "("+ts.join(" OR ")+")"; }).join(" ");
+  }
+
+  // ---- Recall check ----
+  // Would the current query retrieve papers the user already knows are relevant? We evaluate
+  // the Boolean concept structure (AND across blocks, OR within a block) against each known
+  // paper's title and abstract from OpenAlex, entirely client-side, and report which concept
+  // block, if any, excluded it. This is the build-and-validate loop: build, see what it misses,
+  // fix the responsible block.
+  function rcNormalize(s){ return String(s||"").toLowerCase().replace(/[-_/]/g," ").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim(); }
+  function rcEscape(w){ return w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+  function rcTermMatches(term, normText){
+    var raw=String(term), trunc=/\*/.test(raw);
+    var core=rcNormalize(raw.replace(/"/g,"").replace(/\*/g," "));
+    if(!core) return false;
+    var body=core.split(" ").map(rcEscape).join("\\s+");
+    var tail=trunc ? "[a-z0-9]*" : "";   // a trailing asterisk lets the last token extend (truncation)
+    return new RegExp("(^|[^a-z0-9])"+body+tail+"([^a-z0-9]|$)").test(normText);
+  }
+  function rcAbstractFromIndex(idx){ if(!idx) return ""; var a=[]; for(var w in idx){ if(idx.hasOwnProperty(w)) idx[w].forEach(function(p){ a[p]=w; }); } return a.join(" "); }
+  function rcCheck(blocks, normText){
+    var missed=[]; (blocks||[]).forEach(function(ts,i){ if(!ts.some(function(t){ return rcTermMatches(t, normText); })) missed.push(i); });
+    return { retrieved: missed.length===0, missed: missed };
+  }
+  // Strip markup (Crossref abstracts arrive as JATS XML) and collapse whitespace.
+  function rcStripTags(s){ return String(s||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim(); }
+
+  // ---- Search-strategy linter (PRESS / PRISMA-S) ----
+  // Static, deterministic checks of the current strategy against common peer-review-of-search
+  // criteria: enough concepts, synonyms per concept, truncation, spelling variants, abbreviation
+  // and full-term balance, multiple databases, Scholar length, and date limits. Returns a list of
+  // {level, message, concept}. Pure and testable; the UI renders it live as the search is built.
+  function lintStrategy(concepts, opts){
+    opts = opts || {};
+    var out = [];
+    function add(level, message, concept){ out.push({level:level, message:message, concept:concept||null}); }
+    var nonEmpty = (concepts||[]).filter(function(c){ return (c.terms||[]).filter(Boolean).length>0; });
+    if(nonEmpty.length===0){ add("error","No concept blocks with terms yet. Add at least one concept."); return out; }
+    if(nonEmpty.length<2){ add("warning","A focused search usually combines at least two concept blocks with AND; you have "+nonEmpty.length+". A single concept is often too broad."); }
+    var US_UK=[["tumor","tumour"],["behavior","behaviour"],["color","colour"],["fiber","fibre"],["aging","ageing"],["estrogen","oestrogen"],["leukemia","leukaemia"],["pediatric","paediatric"],["signaling","signalling"],["modeling","modelling"],["randomized","randomised"]];
+    (concepts||[]).forEach(function(c){
+      var label=c.label||"concept";
+      var terms=(c.terms||[]).map(function(t){return String(t).trim();}).filter(Boolean);
+      if(terms.length===0){ add("warning","Concept '"+label+"' has no terms; it will be left out of the query.", label); return; }
+      if(terms.length===1){ add("warning","Concept '"+label+"' has only one term. Add synonyms, spelling variants, or abbreviations (PRESS).", label); }
+      var hasTrunc=terms.some(function(t){return /\*/.test(t);});
+      var truncatable=terms.some(function(t){var w=t.replace(/^"|"$/g,"");return !/\s/.test(w)&&/^[A-Za-z]{5,}$/.test(w);});
+      if(!hasTrunc&&truncatable){ add("info","Concept '"+label+"' uses no truncation. Consider stems with an asterisk (for example therap*) to catch word endings (PRESS).", label); }
+      var lc={}; terms.forEach(function(t){ lc[t.replace(/^"|"$/g,"").replace(/\*/g,"").toLowerCase()]=1; });
+      US_UK.forEach(function(p){
+        if(lc[p[0]]&&!lc[p[1]]) add("info","Concept '"+label+"' has '"+p[0]+"' but not the spelling variant '"+p[1]+"' (PRESS).", label);
+        else if(lc[p[1]]&&!lc[p[0]]) add("info","Concept '"+label+"' has '"+p[1]+"' but not the spelling variant '"+p[0]+"' (PRESS).", label);
+      });
+      var hasAcr=terms.some(function(t){var w=t.replace(/^"|"$/g,"");return /^[A-Z0-9][A-Z0-9\-]{1,6}$/.test(w);});
+      var hasPhrase=terms.some(function(t){return /\s/.test(t.replace(/^"|"$/g,""));});
+      if(hasAcr&&!hasPhrase) add("info","Concept '"+label+"' has an abbreviation but no spelled-out phrase. Add the full term too (PRESS).", label);
+      if(hasPhrase&&!hasAcr) add("info","Concept '"+label+"' has spelled-out terms but no abbreviation. If one exists, add it too (PRESS).", label);
+    });
+    var dbs=opts.dbs||[];
+    if(dbs.length&&dbs.length<2) add("warning","Only one database selected ("+dbs.join(", ")+"). PRESS and PRISMA-S recommend searching at least two.");
+    if(opts.scholarLen&&opts.scholarLen>256) add("warning","The Google Scholar query is "+opts.scholarLen+" characters, over Scholar's ~256 limit. Trim to the core concepts for that panel.");
+    var y=opts.years||{};
+    if(y.from!=null&&y.to!=null&&(y.to-y.from)>=0&&(y.to-y.from)<5) add("info","Narrow publication-year limit ("+y.from+"-"+y.to+"). Confirm the restriction is intended and record it (PRISMA-S).");
+    return out;
+  }
+
+  // ---- Save / share / export ----
+  // The whole search serializes to URL-safe base64 (for a shareable link that uploads nothing)
+  // and to JSON (for download/reload). buildSearchRecord emits a PRISMA-S style record listing
+  // each database, the date, the full strings, the limits, and a place for record counts.
+  function qbEncodeState(obj){
+    var b64=btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+    return b64.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+  function qbDecodeState(str){
+    var b64=String(str||"").replace(/-/g,"+").replace(/_/g,"/");
+    while(b64.length%4) b64+="=";
+    return JSON.parse(decodeURIComponent(escape(atob(b64))));
+  }
+  function qbField(label, val){ return val ? ("**"+label+":** "+val+"\n") : ""; }
+  function buildSearchRecord(st, queries, dateStr){
+    st=st||{}; queries=queries||{};
+    var L=[];
+    L.push("# Literature search record","");
+    L.push(qbField("Date of search", dateStr));
+    L.push(qbField("Topic", (st.topic||"").trim()||"(not given)"));
+    var yr=(st.yearFrom||st.yearTo)?("from "+(st.yearFrom||"earliest")+" to "+(st.yearTo||"latest")):"no limit";
+    L.push(qbField("Publication years", yr));
+    L.push(qbField("Document types", (st.docTypes||[]).join(", ")||"any"));
+    L.push(qbField("Databases searched", (st.dbs||[]).join(", ")||"(none selected)"));
+    L.push("","## Concepts and terms","");
+    (st.concepts||[]).forEach(function(c,i){ var ts=(c.terms||[]).filter(Boolean); if(ts.length){ var line=(i+1)+". **"+(c.label||("Concept "+(i+1)))+":** "+ts.join("; "); var mh=(c.mesh||[]).filter(Boolean); if(mh.length) line+="  \n    PubMed MeSH headings: "+mh.join("; "); L.push(line); } });
+    L.push("","## Full search strings","");
+    [["Scopus","Scopus (Advanced Search)"],["WoS","Web of Science (Advanced Search)"],["PubMed","PubMed"],["Scholar","Google Scholar (scoping search, not a search of record)"]].forEach(function(p){ var q=queries[p[0]]; if(q){ L.push("### "+p[1],"","```",q,"```",""); } });
+    L.push("## Records retrieved (fill in)","");
+    (st.dbs||[]).forEach(function(d){ L.push("- "+d+": ____"); });
+    L.push("","## Notes","");
+    L.push("Concept terms were expanded with an AI assistant and/or by mining the literature, then screened by the author. The final search strings above are fully reproducible; if an AI assistant was used to suggest terms, that suggestion step is not deterministic, so this record fixes the exact terms used. Deduplication, screening, and selection were performed outside this tool.");
+    return L.join("\n");
+  }
+
+  function hi(str,kind){
+    var s=esc(str);
+    if(kind==="s") s=s.replace(/\b(TITLE-ABS-KEY|PUBYEAR|DOCTYPE)\b/g,'<span class="fld">$1</span>');
+    else if(kind==="w") s=s.replace(/\b(TS|PY|DT)=/g,'<span class="fld">$1=</span>');
+    else if(kind==="p") s=s.replace(/(\[(?:tiab|dp|pt|MeSH)\])/g,'<span class="fld">$1</span>');
+    s=s.replace(/ (AND NOT|AND|OR) /g,' <span class="op">$1</span> ');
+    return s;
+  }
+
+  // full-text discovery destinations (no fielded Boolean; simple query in the URL)
+  var LINKOUTS = {
+    OA: [
+      { name:"Semantic Scholar", url:function(q){ return "https://www.semanticscholar.org/search?q="+encodeURIComponent(q)+"&sort=relevance"; } },
+      { name:"CORE", url:function(q){ return "https://core.ac.uk/search?q="+encodeURIComponent(q); } },
+      { name:"BASE", url:function(q){ return "https://www.base-search.net/Search/Results?lookfor="+encodeURIComponent(q); } },
+      { name:"Europe PMC", url:function(q){ return "https://europepmc.org/search?query="+encodeURIComponent(q); } }
+    ],
+    Thesis: [
+      { name:"OATD", url:function(q){ return "https://oatd.org/oatd/search?q="+encodeURIComponent(q); } }
+    ],
+    Books: [
+      { name:"Google Books", url:function(q){ return "https://www.google.com/search?tbm=bks&q="+encodeURIComponent(q); } },
+      { name:"Open Library", url:function(q){ return "https://openlibrary.org/search?q="+encodeURIComponent(q); } },
+      { name:"WorldCat", url:function(q){ return "https://search.worldcat.org/search?q="+encodeURIComponent(q); } }
+    ]
+  };
+  function renderLinkouts(){
+    var q=simpleQuery(blocksFor()), active=!!q;
+    [["OA","moreOA"],["Thesis","moreThesis"],["Books","moreBooks"]].forEach(function(pair){
+      var host=$(pair[1]); host.innerHTML="";
+      LINKOUTS[pair[0]].forEach(function(s){
+        var a=document.createElement("a");
+        a.textContent=s.name;
+        a.target="_blank"; a.rel="noopener";
+        if(active){ a.href=s.url(q); a.className=""; }
+        else { a.href="#"; a.className="off"; }
+        host.appendChild(a);
+      });
+    });
+  }
+
+  function applyDBVisibility(){
+    var sel=selectedDBs();
+    document.querySelectorAll(".qcard").forEach(function(card){
+      var db=card.getAttribute("data-db");
+      card.classList.toggle("hide", sel.indexOf(db)===-1);
+    });
+  }
+
+  function renderQueries(){
+    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes();
+    var sc=buildScopus(bl,y,dts), wo=buildWoS(bl,y,dts), gs=buildScholar(bl,y), pm=buildPubMed(bl,y,dts,pubmedMeshFor());
+    var emptyMsg='<span style="color:var(--ink-faint)">Add at least one concept with a term.</span>';
+    $("scopusStr").innerHTML = sc?hi(sc,"s"):emptyMsg; $("scopusStr").setAttribute("data-raw",sc);
+    $("wosStr").innerHTML    = wo?hi(wo,"w"):emptyMsg; $("wosStr").setAttribute("data-raw",wo);
+    $("scholarStr").innerHTML= gs.q?hi(gs.q,"g"):emptyMsg; $("scholarStr").setAttribute("data-raw",gs.q);
+    $("pubmedStr").innerHTML = pm.q?hi(pm.q,"p"):emptyMsg; $("pubmedStr").setAttribute("data-raw",pm.q);
+    var bnew=[["ieeeStr",buildIEEE(bl)],["acmStr",buildACM(bl)],["ericStr",buildERIC(bl)],["ovidStr",buildOvid(bl)],["ebscoStr",buildEBSCO(bl)],["evStr",buildEngVillage(bl)]];
+    bnew.forEach(function(p){ var el=$(p[0]); if(!el)return; if(p[1]){ el.textContent=p[1]; } else { el.innerHTML=emptyMsg; } el.setAttribute("data-raw",p[1]||""); });
+    var meta=$("scholarMeta");
+    if(gs.q){
+      var n=gs.q.length;
+      meta.textContent = n + " characters" + (n>256 ? " — over Google Scholar's ~256 limit, trim to core terms" : "");
+      meta.className = "qmeta" + (n>256 ? " warn" : "");
+    } else { meta.textContent=""; meta.className="qmeta"; }
+    $("scholarLink").setAttribute("href", gs.url);
+    $("pubmedLink").setAttribute("href", pm.url);
+    renderLinkouts();
+    applyDBVisibility();
+    renderLint();
+  }
+
+  function lintLevelColor(l){ return l==="error" ? "var(--danger)" : (l==="warning" ? "var(--scopus-deep)" : "var(--ink-soft)"); }
+  function renderLint(){
+    var host=$("lintResults"); if(!host) return;
+    var empty=$("lintEmpty");
+    var hasConcepts=(state.concepts||[]).some(function(c){ return (c.terms||[]).filter(Boolean).length>0; });
+    if(empty) empty.style.display = hasConcepts ? "none" : "";
+    host.innerHTML="";
+    if(!hasConcepts) return;
+    var opts={ dbs:selectedDBs(), scholarLen:(buildScholar(blocksFor(),yearVals()).q||"").length, years:yearVals() };
+    var issues=lintStrategy(state.concepts, opts);
+    issues.forEach(function(it){
+      var d=document.createElement("div"); d.style.fontSize="13px"; d.style.padding="4px 0"; d.style.color=lintLevelColor(it.level);
+      d.innerHTML="<b>"+esc(it.level.toUpperCase())+"</b>&nbsp; "+esc(it.message);
+      host.appendChild(d);
+    });
+    if(!issues.length){ var ok=document.createElement("div"); ok.style.fontSize="13px"; ok.style.color="var(--scholar-deep)"; ok.style.padding="4px 0"; ok.textContent="No issues flagged by the automated checks."; host.appendChild(ok); }
+    var rep=document.createElement("div"); rep.className="sg-note"; rep.style.marginTop="8px";
+    rep.textContent="PRISMA-S reminder: record each database and platform, the date of the search, the full strategy for each database, all limits and filters, and the number of records retrieved.";
+    host.appendChild(rep);
+  }
+
+  function renderConcepts(){
+    var host=$("concepts"); host.innerHTML="";
+    state.concepts.forEach(function(c,idx){
+      var card=document.createElement("div"); card.className="concept";
+      var head=document.createElement("div"); head.className="concept-head";
+      var dot=document.createElement("span"); dot.className="concept-dot"; dot.textContent=String.fromCharCode(97+idx)+".";
+      var lbl=document.createElement("input"); lbl.className="concept-label"; lbl.value=c.label||("Concept "+(idx+1));
+      lbl.addEventListener("input",function(){ c.label=lbl.value; });
+      var sug=document.createElement("button"); sug.className="mini"; sug.textContent="find terms in literature";
+      sug.addEventListener("click",function(){ openAlexTerms(c, card, sug); });
+      var del=document.createElement("button"); del.className="concept-del"; del.innerHTML="&times;"; del.title="Delete this block";
+      del.addEventListener("click",function(){ state.concepts.splice(idx,1); renderConcepts(); renderQueries(); });
+      head.appendChild(dot); head.appendChild(lbl); head.appendChild(sug); head.appendChild(del);
+
+      var chips=document.createElement("div"); chips.className="chips";
+      (c.terms||[]).forEach(function(term,ti){
+        var chip=document.createElement("span"); chip.className="chip"; chip.appendChild(document.createTextNode(term));
+        var x=document.createElement("button"); x.innerHTML="&times;";
+        x.addEventListener("click",function(){ c.terms.splice(ti,1); renderConcepts(); renderQueries(); });
+        chip.appendChild(x); chips.appendChild(chip);
+      });
+      var add=document.createElement("input"); add.className="add-term"; add.placeholder="add term + Enter";
+      add.addEventListener("keydown",function(e){
+        if(e.key==="Enter"&&add.value.trim()){ c.terms=c.terms||[]; c.terms.push(add.value.trim()); add.value=""; renderConcepts(); renderQueries(); var ins=host.querySelectorAll(".add-term"); if(ins[idx])ins[idx].focus(); }
+      });
+      chips.appendChild(add);
+
+      var sw=document.createElement("div"); sw.className="suggest-wrap"; sw.setAttribute("data-suggest",""); sw.setAttribute("aria-live","polite");
+
+      card.appendChild(head); card.appendChild(chips); card.appendChild(sw);
+      host.appendChild(card);
+    });
+    renderMesh();
+  }
+
+  // ---- MeSH heading suggestions for PubMed (optional online enhancement) ----
+  // The core query builder stays fully offline. Suggestions come from the NLM public lookup
+  // service (id.nlm.nih.gov, public domain, CORS-open). Selecting a heading is a manual click,
+  // so the PubMed string stays deterministic; nothing is added automatically. Suggested labels
+  // are kept on each concept as a non-serialised _meshSug field; chosen labels live in c.mesh.
+  var MESH_LOOKUP = "https://id.nlm.nih.gov/mesh/lookup/descriptor";
+  var meshStatus = null; // null | "loading" | "neterr"
+  function meshClean(t){ return String(t).replace(/^"+|"+$/g,"").replace(/\*/g,"").trim(); }
+  function meshFetch(label){
+    return fetch(MESH_LOOKUP+"?label="+encodeURIComponent(label)+"&match=contains&limit=7")
+      .then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.json(); })
+      .then(function(arr){ return (arr||[]).map(function(o){ return o.label; }).filter(Boolean); });
+  }
+  function suggestMesh(){
+    var host=$("meshSug"); if(!host) return;
+    var targets=[];
+    (state.concepts||[]).forEach(function(c){ if((c.terms||[]).map(normTerm).filter(Boolean).length) targets.push(c); });
+    if(!targets.length){ meshStatus=null; host.innerHTML='<div class="meshmsg">Add at least one concept with a term first.</div>'; return; }
+    if(typeof navigator!=="undefined" && navigator.onLine===false){ meshStatus="neterr"; renderMesh(); return; }
+    meshStatus="loading"; host.innerHTML='<div class="meshmsg">Looking up MeSH headings…</div>';
+    var netErr=false;
+    var jobs=targets.map(function(c){
+      var seen={}, labels=[];
+      (c.terms||[]).forEach(function(t){ var l=meshClean(t), k=l.toLowerCase(); if(l && !seen[k]){ seen[k]=1; labels.push(l); } });
+      labels=labels.slice(0,3); // cap lookups per concept
+      return Promise.all(labels.map(function(l){ return meshFetch(l).catch(function(){ netErr=true; return []; }); }))
+        .then(function(lists){
+          var dd={}, out=[];
+          lists.forEach(function(ls){ ls.forEach(function(lab){ var k=lab.toLowerCase(); if(!dd[k]){ dd[k]=1; out.push(lab); } }); });
+          c._meshSug=out;
+        });
+    });
+    Promise.all(jobs).then(function(){
+      var got=targets.some(function(c){ return (c._meshSug||[]).length; });
+      meshStatus = (!got && netErr) ? "neterr" : null;
+      renderMesh();
+    });
+  }
+  function renderMesh(){
+    var host=$("meshSug"); if(!host) return;
+    var html="", any=false;
+    (state.concepts||[]).forEach(function(c,ci){
+      var hasTerms=(c.terms||[]).map(normTerm).filter(Boolean).length>0;
+      var seen={}, union=[];
+      (c.mesh||[]).concat(c._meshSug||[]).forEach(function(lab){ var k=String(lab).toLowerCase(); if(lab && !seen[k]){ seen[k]=1; union.push(lab); } });
+      if(!union.length) return;
+      any=true;
+      html+='<div class="meshgrp"><div class="meshlab">'+esc(c.label||("Concept "+(ci+1)))+(hasTerms?"":' <span style="font-weight:400;text-transform:none">(add a free-text term for these to apply)</span>')+'</div><div class="meshchips">';
+      union.forEach(function(lab){
+        var on=(c.mesh||[]).some(function(x){ return String(x).toLowerCase()===String(lab).toLowerCase(); });
+        html+='<button type="button" class="meshchip'+(on?" on":"")+'" data-ci="'+ci+'" data-mesh="'+esc(lab)+'">'+esc(lab)+'</button>';
+      });
+      html+='</div></div>';
+    });
+    if(!any){
+      if(meshStatus==="loading"){ host.innerHTML='<div class="meshmsg">Looking up MeSH headings…</div>'; return; }
+      if(meshStatus==="neterr"){ host.innerHTML='<div class="meshmsg warn">Could not reach the NLM MeSH service. Query building works offline; MeSH headings are an optional online extra.</div>'; return; }
+      host.innerHTML=""; return;
+    }
+    host.innerHTML=html;
+  }
+  if($("meshBtn")) $("meshBtn").addEventListener("click", suggestMesh);
+  if($("meshSug")) $("meshSug").addEventListener("click", function(e){
+    var b=e.target && e.target.closest ? e.target.closest(".meshchip") : null; if(!b) return;
+    var ci=parseInt(b.getAttribute("data-ci"),10), lab=b.getAttribute("data-mesh");
+    var c=state.concepts[ci]; if(!c || !lab) return;
+    c.mesh=c.mesh||[];
+    var idx=-1; for(var i=0;i<c.mesh.length;i++){ if(String(c.mesh[i]).toLowerCase()===lab.toLowerCase()){ idx=i; break; } }
+    if(idx>=0) c.mesh.splice(idx,1); else c.mesh.push(lab);
+    b.classList.toggle("on");
+    renderQueries();
+  });
+
+  // ---- OpenAlex literature term discovery (replaces the old general-dictionary helper) ----
+  // Harvests candidate terms from the titles and abstracts of records that match the
+  // concept's current terms, ranked by how many records mention each. These are CANDIDATES,
+  // not confirmed synonyms; the user screens them. Falls back to a general dictionary, and
+  // ultimately to manual entry, when the literature service cannot be reached.
+  var OPENALEX = "https://api.openalex.org/works";
+  // TODO before publishing: set OA_MAILTO to a real contact address (a dedicated project
+  // address is cleanest, since it is visible in the page source) to use OpenAlex's faster
+  // "polite pool". Leaving it "" uses the shared pool; the tool still works either way.
+  var OA_MAILTO = "";
+  // Cached background sizes for keyness scoring: total English works in OpenAlex, and a
+  // per-term document-count cache so repeated mining does not refetch the same backgrounds.
+  var OA_REFSIZE = 0, OA_BG = {};
+
+  var OA_STOP = (function(){
+    var s={}, w=("a about above after again against all also am among an and any are as at be because been before being below between both but by can cannot could did do does doing down during each few for from further had has have having he her here hers herself him himself his how however i if in into is it its itself let me more most much must my myself no nor not of off on once only or other ought our ours ourselves out over own same she should so some such than that the their theirs them themselves then there these they this those through to too under until up upon very was we were what when where which while who whom why will with within without would you your yours yourself yourselves "
+      + "study studies result results paper papers method methods methodology approach approaches analysis analyses data dataset show shown showed shows present presented novel new effect effects via well therefore thus due role review reviews using used use uses two three four different following including based obtained observed found reported respectively whereas although order may might one many several various first second third aim aims objective objectives finding findings conclusion conclusions background introduction discussion table figure al per non total number high low large small significant significantly toward towards important current major higher lower improved followed recent recently potential particularly especially associated related provide provides provided able due "
+      + "evidence empirical model models framework frameworks examine examined examining investigate investigated investigation investigations assess assessed assessment assessments evaluate evaluated evaluation evaluations consider considered considering propose proposed proposes suggest suggests suggested literature context contexts factor factors case cases sample samples level levels increase increases increased increasing decrease decreases decreased reduce reduces reduced compare compares comparison comparisons determine determines determined identify identifies identified characterize characterized characterization develop develops developing application applications implication implications perspective perspectives overview survey surveys insight insights challenge challenges issue issues trend trends parameter parameters value values range ranges scenario scenarios work works report reports address addressed addressing focus focused achieve achieved enable enabled enabling demonstrate demonstrated goal goals task tasks step steps stage stages type types kind kinds form forms part parts way ways need needs require requires required allow allows allowing involve involved key main overall given wide find finds").split(/\s+/);
+    for(var i=0;i<w.length;i++) s[w[i]]=1; return s;
+  })();
+
+  function oaNorm(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9 -]/g," "); }
+  function oaToks(s){ var o=[],a=oaNorm(s).split(/\s+/); for(var i=0;i<a.length;i++){ var t=a[i].replace(/^-+|-+$/g,""); if(t) o.push(t); } return o; }
+  function oaInvKeys(w){ var o=[],idx=w.abstract_inverted_index; if(idx){ for(var k in idx){ if(idx.hasOwnProperty(k)){ var ts=oaToks(k); for(var j=0;j<ts.length;j++) o.push(ts[j]); } } } return o; }
+  function oaBigrams(a){ var o=[]; for(var i=0;i<a.length-1;i++) o.push(a[i]+" "+a[i+1]); return o; }
+
+  // Build a FOCUSED seed of a few general single words. A long bag of terms, or a single
+  // very specific phrase, collapses OpenAlex to a handful of scattered records, so we take
+  // one representative word from each concept block (domain spread) plus the Step 1 topic,
+  // drop stopwords, keep them general and single, and cap the count.
+  function oaStrip(t){ return String(t).replace(/^"|"$/g,"").replace(/\*/g,"").trim(); }
+  function oaMeaningfulLabel(l){ l=String(l||"").trim(); return (l && !/^(new concept|concept\s*\d+|new)$/i.test(l)) ? l : ""; }
+  function oaFirstWord(text){ var ws=oaToks(text); for(var i=0;i<ws.length;i++){ if(ws[i].length>=3 && !OA_STOP[ws[i]]) return ws[i]; } return ""; }
+
+  function oaSeed(concept, conceptsArg, topicArg){
+    var SEED_MAX=5, words=[], seen={};
+    function push(w){ if(w && w.length>=3 && !OA_STOP[w] && !seen[w] && words.length<SEED_MAX){ seen[w]=1; words.push(w); } }
+    // A truncated term (transcriptom*) becomes a broken stem once the asterisk is stripped
+    // and makes a poor literature-search seed, so such terms are skipped as seed sources.
+    function clean(t){ return /\*/.test(String(t)) ? "" : oaStrip(t); }
+    function labelWords(c){ return oaToks(oaMeaningfulLabel(c.label)); }
+    function firstTermWords(c){ var t=(c.terms&&c.terms.length)?clean(c.terms[0]):""; return t?oaToks(t):[]; }
+    // a concept's most general anchor word: prefer a label word (labels are general), else a term word
+    function anchor(c){
+      var lw=labelWords(c), i, j, ws;
+      for(i=0;i<lw.length;i++){ if(lw[i].length>=3 && !OA_STOP[lw[i]]) return lw[i]; }
+      var tw=firstTermWords(c);
+      for(i=0;i<tw.length;i++){ if(tw[i].length>=3 && !OA_STOP[tw[i]]) return tw[i]; }
+      var terms=c.terms||[];
+      for(i=0;i<terms.length;i++){ ws=oaToks(clean(terms[i])); for(j=0;j<ws.length;j++){ if(ws[j].length>=3 && !OA_STOP[ws[j]]) return ws[j]; } }
+      return "";
+    }
+    var concepts = conceptsArg || state.concepts || [];
+    // pass 1: one general anchor word from each concept (mined concept first) so the domain is represented
+    push(anchor(concept));
+    concepts.forEach(function(c){ if(c!==concept) push(anchor(c)); });
+    // pass 2: fill remaining slots from the mined concept's other general words (label first, then terms), then the topic
+    labelWords(concept).forEach(push);
+    (concept.terms||[]).forEach(function(t){ oaToks(clean(t)).forEach(push); });
+    var topicText = (typeof topicArg!=="undefined") ? topicArg
+      : (function(){ var el=document.getElementById("topic"); return el?el.value:""; })();
+    if(topicText) oaToks(topicText).forEach(push);
+    return words.join(" ");
+  }
+
+  // Candidates are ranked by document frequency in the sample multiplied by a co-occurrence
+  // weight: a term that shares records with many other candidate terms is more central to
+  // the topic's vocabulary than an equally frequent term that occurs in isolation. This is a
+  // lightweight version of the keyword co-occurrence idea used by litsearchr, computed from
+  // the sampled records alone with no extra requests.
+  var COOC_ALPHA=0.6;
+  function oaScore(records, existingLower, seedLower){
+    var df={}, isPhrase={}, sets=[], n=records.length, i;
+    records.forEach(function(w){
+      var tt=oaToks(w.title), seen={};
+      var uni=tt.concat(oaInvKeys(w));
+      for(i=0;i<uni.length;i++) seen[uni[i]]=1;
+      var bg=oaBigrams(tt);
+      for(i=0;i<bg.length;i++){ var p=bg[i].split(" "); if(!OA_STOP[p[0]] && !OA_STOP[p[1]]){ seen[bg[i]]=1; isPhrase[bg[i]]=1; } }
+      var keys=[];
+      for(var term in seen){ if(seen.hasOwnProperty(term)){ df[term]=(df[term]||0)+1; keys.push(term); } }
+      sets.push(keys);
+    });
+    var cooc={}, maxC=0;
+    sets.forEach(function(keys){
+      var k=keys.length-1; if(k<=0) return;
+      for(i=0;i<keys.length;i++){ cooc[keys[i]]=(cooc[keys[i]]||0)+k; }
+    });
+    for(var cc in cooc){ if(cooc.hasOwnProperty(cc) && cooc[cc]>maxC) maxC=cooc[cc]; }
+    function weight(term){ return df[term]*(1+(maxC?COOC_ALPHA*(cooc[term]||0)/maxC:0)); }
+    var ceil=0.75*n, singles=[], phrases=[];
+    for(var term in df){
+      if(!df.hasOwnProperty(term)) continue;
+      if(term.length<3 || /^\d+$/.test(term)) continue;
+      if(df[term]>ceil) continue;
+      if(existingLower[term] || seedLower[term]) continue;
+      if(isPhrase[term]) phrases.push({term:term, df:df[term], score:weight(term)*1.6});
+      else { if(OA_STOP[term]) continue; singles.push({term:term, df:df[term], score:weight(term)}); }
+    }
+    phrases.sort(function(a,b){ return b.score-a.score; });
+    singles.sort(function(a,b){ return b.score-a.score; });
+    return { phrases:phrases.slice(0,18), singles:singles.slice(0,28), n:n };
+  }
+
+  // Keyness against a background reference (all English works in OpenAlex). It measures how
+  // over-represented a candidate is in the topic sample relative to the literature at large,
+  // which demotes generically frequent words that raw document frequency ranks highly. Inputs:
+  // a = sample document frequency, c = sample size, b = background document frequency,
+  // d = background size. Returns the Dunning log-likelihood G2 (significance) and the base-2
+  // relative-frequency log ratio (effect size); ranking uses the ratio, gated by G2, a minimum
+  // document frequency, and a background floor so that ultra-rare tokens do not dominate.
+  function oaKeyness(a, b, c, d){
+    a=+a; b=+b||0; c=+c; d=+d;
+    var pS=a/c, pR=(b+0.5)/d;
+    var logRatio=Math.log(pS/pR)/Math.LN2;
+    var E1=c*(a+b)/(c+d), E2=d*(a+b)/(c+d), g=0;
+    if(a>0) g+=a*Math.log(a/E1);
+    if(b>0) g+=b*Math.log(b/E2);
+    g*=2;
+    return { ll:g, logRatio:logRatio, over:(pS>pR) };
+  }
+
+  function oaAddTerm(concept, raw){
+    var t=normTerm(raw);
+    concept.terms=concept.terms||[];
+    if(concept.terms.indexOf(t)===-1) concept.terms.push(t);
+    renderConcepts(); renderQueries();
+  }
+
+  function openAlexTerms(concept, card, btn){
+    var sw=card.querySelector("[data-suggest]"); if(!sw) return;
+    if(typeof concept._recent==="undefined") concept._recent=false;
+    var myToken=(concept._mineToken=(concept._mineToken||0)+1);
+    function fresh(){ return concept._mineToken===myToken; }
+    function reset(){ if(btn){ btn.disabled=false; btn.textContent="find terms in literature"; } }
+    if(btn){ btn.disabled=true; btn.textContent="mining…"; }
+
+    var existingLower={};
+    (concept.terms||[]).forEach(function(t){ existingLower[String(t).replace(/^"|"$/g,"").replace(/\*/g,"").toLowerCase().trim()]=1; });
+    var seedLower={}; oaToks(oaSeed(concept)).forEach(function(t){ seedLower[t]=1; });
+
+    var seed=encodeURIComponent(oaSeed(concept));
+    if(!seed){ sw.innerHTML='<div class="sg-note">Add a concept name or one term first, then mine the literature.</div>'; return; }
+
+    function header(){
+      var h=document.createElement("label");
+      h.className="sg-note"; h.style.display="inline-flex"; h.style.alignItems="center"; h.style.gap="6px"; h.style.cursor="pointer"; h.style.marginBottom="6px";
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!concept._recent;
+      cb.addEventListener("change",function(){ concept._recent=cb.checked; openAlexTerms(concept, card); });
+      h.appendChild(cb); h.appendChild(document.createTextNode("recent terms only (since 2022)"));
+      return h;
+    }
+
+    sw.innerHTML=""; sw.appendChild(header());
+    var status=document.createElement("div"); status.className="sg-note"; status.textContent="Mining candidate terms from the literature…"; sw.appendChild(status);
+
+    // OpenAlex query. A language:en filter keeps the candidate terms in one language so the
+    // tokenizer cannot shred non-Latin text into meaningless fragments; the optional recent
+    // filter is appended to the same comma-separated filter parameter.
+    var MIN_SAMPLE=30;
+    function oaUrl(seedStr){
+      var filters=["language:en"];
+      if(concept._recent) filters.push("from_publication_date:2022-01-01");
+      return OPENALEX+"?search="+encodeURIComponent(seedStr)
+        +"&per-page=100&select=title,abstract_inverted_index,language"
+        +"&filter="+filters.join(",")
+        +(OA_MAILTO?("&mailto="+encodeURIComponent(OA_MAILTO)):"");
+    }
+    function getJSON(u){ return fetch(u).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.json(); }); }
+
+    var rawSeed=oaSeed(concept);
+    var seedWords=rawSeed.split(/\s+/).filter(Boolean);
+
+    getJSON(oaUrl(rawSeed)).then(function(j){
+      var recs=(j&&j.results)?j.results:[];
+      // Minimum-sample guard: a narrow seed can return too few records to rank reliably, so
+      // broaden once to the two most general seed words and re-query before ranking.
+      if(recs.length<MIN_SAMPLE && seedWords.length>2){
+        return getJSON(oaUrl(seedWords.slice(0,2).join(" "))).then(function(j2){
+          var recs2=(j2&&j2.results)?j2.results:[];
+          scoreAndRender(recs2.length>=recs.length?recs2:recs, recs2.length>=recs.length);
+        });
+      }
+      scoreAndRender(recs, false);
+    }).catch(function(){ if(!fresh()){ reset(); return; } sw.innerHTML=""; sw.appendChild(header()); datamuseFallback(concept, sw); reset(); });
+
+    // Count of works matching an OpenAlex filter (background frequency for keyness scoring).
+    function oaCount(filter){
+      return fetch(OPENALEX+"?per-page=1&select=id&filter="+filter+(OA_MAILTO?("&mailto="+encodeURIComponent(OA_MAILTO)):""))
+        .then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.json(); })
+        .then(function(j){ return (j&&j.meta&&j.meta.count)||0; });
+    }
+    function oaBgFilter(term){
+      var phrase=/\s/.test(term), t=term.replace(/\*/g,"").replace(/"/g,"");
+      return "language:en,title_and_abstract.search:"+encodeURIComponent(phrase?('"'+t+'"'):t);
+    }
+    function runPool(items, limit, fn){
+      return new Promise(function(resolve){
+        var i=0, active=0, done=0; if(!items.length) return resolve();
+        function fin(){ active--; done++; (done===items.length) ? resolve() : next(); }
+        function next(){ while(active<limit && i<items.length){ active++; Promise.resolve(fn(items[i++])).then(fin, fin); } }
+        next();
+      });
+    }
+
+    // Pool the strongest frequency candidates, fetch each one's background document count, then
+    // re-rank by keyness so that generically frequent words are demoted in favour of terms that
+    // are distinctive to this topic. Falls back to frequency order if the background is offline.
+    function scoreAndRender(recs, broadened){
+      var res=oaScore(recs, existingLower, seedLower);
+      if(!res.phrases.length && !res.singles.length){ renderLists(res, [], [], broadened, false); return; }
+      status.textContent="Scoring term keyness against the literature\u2026";
+      var pool=res.phrases.slice(0,16).concat(res.singles.slice(0,24));
+      var refReady = OA_REFSIZE ? Promise.resolve(OA_REFSIZE) : oaCount("language:en").then(function(c){ OA_REFSIZE=c; return c; });
+      refReady.then(function(refSize){
+        var todo=pool.filter(function(r){ return !(r.term in OA_BG); });
+        return runPool(todo, 6, function(r){ return oaCount(oaBgFilter(r.term)).then(function(c){ OA_BG[r.term]=c; }, function(){ OA_BG[r.term]=null; }); })
+          .then(function(){
+            var MINDF_S=3, MINDF_P=2, BG_MIN=5, LL_MIN=6.63;
+            function keyed(rows, minDf){
+              var out=[];
+              rows.forEach(function(r){
+                var bg=OA_BG[r.term]; if(bg==null) return;
+                var k=oaKeyness(r.df, bg, res.n, refSize);
+                if(r.df>=minDf && bg>=BG_MIN && k.over && k.ll>=LL_MIN) out.push({term:r.term, df:r.df, bg:bg, key:k.logRatio});
+              });
+              out.sort(function(a,b){ return b.key-a.key; });
+              return out;
+            }
+            var phr=keyed(res.phrases.slice(0,16), MINDF_P).slice(0,12);
+            var sng=keyed(res.singles.slice(0,24), MINDF_S).slice(0,18);
+            if(!phr.length && !sng.length) renderLists(res, res.phrases.slice(0,12), res.singles.slice(0,18), broadened, false);
+            else renderLists(res, phr, sng, broadened, true);
+          });
+      }).catch(function(){ renderLists(res, res.phrases.slice(0,12), res.singles.slice(0,18), broadened, false); });
+    }
+
+    function renderLists(res, phrases, singles, broadened, keyed){
+      if(!fresh()) return;
+      reset();
+      sw.innerHTML=""; sw.appendChild(header());
+      if(res.n<MIN_SAMPLE){
+        var warn=document.createElement("div"); warn.className="sg-note"; warn.style.color="var(--scopus-deep)";
+        warn.textContent="Only "+res.n+" English records matched this seed, too few for a stable ranking. Treat these as rough, broaden the concept name, or add terms by hand.";
+        sw.appendChild(warn);
+      }
+      if(!phrases.length && !singles.length){
+        var nd=document.createElement("div"); nd.className="sg-note";
+        nd.textContent = res.n ? "No new candidate terms beyond what you already have. Try a broader seed term." : "No English records matched these seed terms. Try a broader seed, or add terms by hand.";
+        sw.appendChild(nd); return;
+      }
+      function group(title, rows){
+        if(!rows.length) return;
+        var lbl=document.createElement("div"); lbl.className="sg-note"; lbl.style.fontWeight="600"; lbl.textContent=title; sw.appendChild(lbl);
+        var box=document.createElement("div"); box.className="suggest-chips";
+        rows.forEach(function(r){
+          var b=document.createElement("button"); b.className="sg"; b.textContent="+ "+r.term;
+          b.title = (keyed && typeof r.key==="number")
+            ? ("keyness "+r.key.toFixed(1)+"  \u00b7  in "+r.df+" of "+res.n+" sampled records  \u00b7  "+r.bg.toLocaleString()+" works in the literature")
+            : (r.df+" of "+res.n+" sampled records mention this");
+          b.addEventListener("click",function(){ oaAddTerm(concept, r.term); });
+          box.appendChild(b);
+        });
+        sw.appendChild(box);
+      }
+      group("Phrases from the literature", phrases);
+      group("Single terms from the literature", singles);
+      var note=document.createElement("div"); note.className="sg-note";
+      note.textContent="Candidate terms from "+res.n+(concept._recent?" recent":"")+(broadened?" (broadened seed)":"")+" English records via OpenAlex, ranked by "+(keyed?"keyness, how over-represented each term is versus the wider literature":"frequency")+". These are candidates, not confirmed synonyms. Screen each one before adding.";
+      sw.appendChild(note);
+      if((state.concepts||[]).length<2){
+        var hint=document.createElement("div"); hint.className="sg-note"; hint.style.color="var(--scopus-deep)";
+        hint.textContent="Tip: add another concept block (your organism, material, or field) so these suggestions lock onto your domain.";
+        sw.appendChild(hint);
+      }
+    }
+  }
+
+  function datamuseFallback(concept, sw){
+    var seed=(concept.label||"").replace(/[^a-zA-Z0-9 ]/g,"").trim();
+    if(!seed && (concept.terms||[]).length) seed=String(concept.terms[0]).replace(/^"|"$/g,"").replace(/\*/g,"").trim();
+    if(!seed){ var x=document.createElement("div"); x.className="sg-note"; x.textContent="Literature service offline and no seed available. Add terms by hand."; sw.appendChild(x); return; }
+    var warn=document.createElement("div"); warn.className="sg-note";
+    warn.textContent="Literature service unreachable. Showing general-language suggestions instead, which are weaker for scientific terms. Screen each one before adding.";
+    sw.appendChild(warn);
+    fetch("https://api.datamuse.com/words?ml="+encodeURIComponent(seed)+"&max=12")
+      .then(function(r){ return r.json(); })
+      .then(function(list){
+        if(!list||!list.length){ var n=document.createElement("div"); n.className="sg-note"; n.textContent="No suggestions available offline. Add terms by hand."; sw.appendChild(n); return; }
+        var box=document.createElement("div"); box.className="suggest-chips";
+        list.forEach(function(w){
+          var b=document.createElement("button"); b.className="sg"; b.textContent="+ "+w.word+"  ·gen"; b.title="general-language association, not from the literature";
+          b.addEventListener("click",function(){ oaAddTerm(concept, w.word); });
+          box.appendChild(b);
+        });
+        sw.appendChild(box);
+      })
+      .catch(function(){ var n=document.createElement("div"); n.className="sg-note"; n.textContent="Both services unreachable. Add terms by hand."; sw.appendChild(n); });
+  }
+
+  function renderNarrower(){
+    var host=$("narrowGrid"); host.innerHTML="";
+    if(!state.narrower||!state.narrower.length){ host.innerHTML='<span class="empty-note">Narrower angles appear here after you paste an AI reply in step 3.</span>'; return; }
+    state.narrower.forEach(function(n){
+      var b=document.createElement("button"); b.className="narrow-chip";
+      var arr=document.createElement("span"); arr.className="arr"; arr.textContent="→";
+      var tx=document.createElement("span"); tx.textContent=n;
+      b.appendChild(arr); b.appendChild(tx);
+      b.addEventListener("click",function(){ state.focus=n; updatePrompt(); $("promptBox").scrollIntoView({behavior:"smooth",block:"center"}); flash(b); });
+      host.appendChild(b);
+    });
+  }
+  function flash(el){ el.style.borderColor="var(--go)"; el.style.background="var(--scholar-bg)"; setTimeout(function(){ el.style.background="#fff"; },700); }
+
+  function buildPrompt(topic, focus){
+    return [
+      "You are an expert systematic-review search strategist, like an information specialist who builds Boolean searches for Scopus, Web of Science, and PubMed. I will give you a research topic. Break it into 2 to 4 distinct concept blocks. The blocks are combined with AND, so each must be a separate, non-overlapping facet of the topic.",
+      "",
+      "TOPIC:",
+      topic || "(paste your topic here)",
+      focus ? "\nNARROW IT SPECIFICALLY TO THIS ANGLE: " + focus : "",
+      "",
+      "Reply in EXACTLY this format and nothing else. No commentary, no markdown, no numbering, no code fences.",
+      "",
+      "CONCEPT: <short name of concept 1, most central concept first>",
+      "TERMS: <terms separated by semicolons>",
+      "CONCEPT: <short name of concept 2>",
+      "TERMS: <...>",
+      "(repeat for each concept)",
+      "NARROWER: <4 to 6 more specific angles to tighten the topic, separated by semicolons>",
+      "",
+      "Rules for TERMS (these mirror PRESS peer-review-of-search criteria):",
+      "- Give true synonyms and variants for that ONE concept only: synonyms, British and American spellings (for example tumour; tumor), abbreviations together with their spelled-out form (for example \"magnetic resonance imaging\"; MRI), and closely related method, instrument, gene, organism, drug, or material names.",
+      "- Aim for 8 to 16 terms, or as many true synonyms as genuinely exist. Prefer precision: never pad with generic words that occur in almost any paper (for example study, analysis, patients, effect, method, results).",
+      "- Put every multi-word term in double quotes, for example \"salt tolerance\".",
+      "- Use a trailing asterisk only where the stem is unambiguous, for example transcriptom*, halotoleran*. Do not truncate where it would catch unrelated words (for example do not use cell*, which also matches cellular and cellphone).",
+      "- Separate terms with semicolons only. Use only letters, numbers, spaces, double quotes, and asterisks. No commas between terms, no parentheses, no AND, OR, or NOT.",
+      "- Keep the facets distinct: do not repeat the same word across different concepts."
+    ].join("\n");
+  }
+  function updatePrompt(){ $("promptBox").textContent = buildPrompt($("topic").value.trim(), state.focus); }
+
+  function parseReply(text){
+    var concepts=[], narrower=[];
+    var t=String(text||"").trim();
+    if(!t) return {concepts:concepts, narrower:narrower};
+
+    // try JSON first
+    if(t.charAt(0)==="{" || /```/.test(t)){
+      try{
+        var j=t.replace(/```json/gi,"").replace(/```/g,"").trim();
+        var a=j.indexOf("{"), b=j.lastIndexOf("}");
+        if(a!==-1&&b!==-1) j=j.slice(a,b+1);
+        var obj=JSON.parse(j);
+        if(obj.concepts&&obj.concepts.length){
+          concepts=obj.concepts.map(function(c){ return {label:c.label||"Concept", terms:Array.isArray(c.terms)?c.terms.slice():[], mesh:Array.isArray(c.mesh)?c.mesh.slice():[]}; });
+          narrower=Array.isArray(obj.narrower)?obj.narrower:[];
+          return {concepts:concepts, narrower:narrower};
+        }
+      }catch(e){}
+    }
+
+    // labeled line format
+    var lines=t.split(/\r?\n/), cur=null;
+    function splitTerms(s){
+      s=s.trim();
+      var parts = s.indexOf(";")!==-1 ? s.split(";") : s.split(",");
+      return parts.map(function(x){ return x.trim(); }).filter(Boolean);
+    }
+    lines.forEach(function(line){
+      var mC=line.match(/^\s*CONCEPT\s*[:\-]\s*(.+)$/i);
+      var mT=line.match(/^\s*TERMS?\s*[:\-]\s*(.+)$/i);
+      var mN=line.match(/^\s*NARROWER\s*[:\-]\s*(.+)$/i);
+      if(mC){ cur={label:mC[1].trim(), terms:[]}; concepts.push(cur); }
+      else if(mT && cur){ cur.terms=splitTerms(mT[1]); }
+      else if(mN){ narrower=splitTerms(mN[1]); }
+    });
+    return {concepts:concepts, narrower:narrower};
+  }
+
+  function loadParsed(obj, fromReply){
+    state.concepts=obj.concepts.map(function(c){ return {label:c.label||"Concept", terms:(c.terms||[]).slice(), mesh:Array.isArray(c.mesh)?c.mesh.slice():[]}; });
+    state.narrower=obj.narrower||[];
+    renderConcepts(); renderQueries(); renderNarrower();
+  }
+
+  // ---------- events ----------
+  $("doctypes").addEventListener("click",function(e){ var b=e.target.closest(".toggle"); if(!b)return; b.classList.toggle("on"); b.setAttribute("aria-pressed", b.classList.contains("on")); renderQueries(); });
+  $("dbtoggles").addEventListener("click",function(e){ var b=e.target.closest(".toggle"); if(!b)return; b.classList.toggle("on"); b.setAttribute("aria-pressed", b.classList.contains("on")); renderQueries(); });
+  $("yearFrom").addEventListener("input",renderQueries);
+  $("yearTo").addEventListener("input",renderQueries);
+  $("topic").addEventListener("input",function(){ state.focus=null; updatePrompt(); });
+
+  document.querySelectorAll(".ex-btn").forEach(function(b){
+    b.addEventListener("click",function(){ $("topic").value=EXAMPLES[b.getAttribute("data-ex")]||""; state.focus=null; updatePrompt(); $("topic").focus(); });
+  });
+
+  $("copyPrompt").addEventListener("click",function(){ copyText($("promptBox").textContent, $("copyPrompt"), "Copy prompt"); });
+
+  $("parseReply").addEventListener("click",function(){
+    var obj=parseReply($("aiReply").value);
+    var msg=$("parseMsg");
+    if(obj.concepts.length){
+      loadParsed(obj, true);
+      msg.className="parse-msg ok";
+      msg.textContent="Loaded "+obj.concepts.length+" concept block"+(obj.concepts.length>1?"s":"")+(obj.narrower.length?(" and "+obj.narrower.length+" narrower angles."):".");
+      $("concepts").scrollIntoView({behavior:"smooth",block:"start"});
+    } else {
+      msg.className="parse-msg bad";
+      msg.textContent="Could not read concept blocks from that text. Check it has CONCEPT: and TERMS: lines, or add blocks by hand below.";
+    }
+  });
+
+  $("clearAll").addEventListener("click",function(){
+    state.concepts=[]; state.narrower=[]; state.focus=null;
+    $("aiReply").value=""; $("parseMsg").className="parse-msg"; $("parseMsg").textContent="";
+    renderConcepts(); renderQueries(); renderNarrower(); updatePrompt();
+  });
+
+  $("addConcept").addEventListener("click",function(){ state.concepts.push({label:"New concept",terms:[]}); renderConcepts(); renderQueries(); });
+
+  // ---- recall check wiring ----
+  // When OpenAlex has no abstract, try other free, CORS-enabled metadata sources in turn:
+  // Europe PMC (strong for life sciences), then Crossref, then Semantic Scholar.
+  function rcFetchAbstract(doi){
+    var enc=encodeURIComponent(doi);
+    var sources=[
+      { name:"Europe PMC", url:"https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI:"+enc+"&format=json&resultType=core", pick:function(j){ var it=j&&j.resultList&&j.resultList.result&&j.resultList.result[0]; return it&&it.abstractText?it.abstractText:""; } },
+      { name:"Crossref", url:"https://api.crossref.org/works/"+enc, pick:function(j){ return j&&j.message&&j.message.abstract?j.message.abstract:""; } },
+      { name:"Semantic Scholar", url:"https://api.semanticscholar.org/graph/v1/paper/DOI:"+enc+"?fields=abstract", pick:function(j){ return j&&j.abstract?j.abstract:""; } }
+    ];
+    function tryNext(i){
+      if(i>=sources.length) return Promise.resolve({text:"", source:""});
+      var s=sources[i];
+      return fetch(s.url).then(function(r){ return r.ok?r.json():null; }).then(function(j){
+        var a=j?s.pick(j):""; if(a) return {text:rcStripTags(a), source:s.name};
+        return tryNext(i+1);
+      }, function(){ return tryNext(i+1); });
+    }
+    return tryNext(0);
+  }
+  function rcResolveText(line){
+    line=String(line||"").trim(); if(!line) return Promise.resolve(null);
+    var doiM=line.match(/10\.\d{4,9}\/[^\s"<>]+/), idM=line.match(/^(?:https?:\/\/openalex\.org\/)?(W\d+)$/i), url;
+    var sel="?select=title,abstract_inverted_index,doi";
+    if(doiM) url=OPENALEX+"/doi:"+encodeURIComponent(doiM[0])+sel;
+    else if(idM) url=OPENALEX+"/"+idM[1].toUpperCase()+sel;
+    else url=OPENALEX+"?search="+encodeURIComponent(line)+"&per-page=1&select=title,abstract_inverted_index,doi";
+    url+=(OA_MAILTO?("&mailto="+encodeURIComponent(OA_MAILTO)):"");
+    return fetch(url).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.json(); })
+      .then(function(j){
+        var w=j&&j.results?(j.results[0]||null):j;
+        if(!w||(!w.id&&!w.title)) return {input:line, found:false};
+        var title=w.title||"(untitled)";
+        var doi=(w.doi||"").replace(/^https?:\/\/doi\.org\//,"") || (doiM?doiM[0]:"");
+        var abs=rcAbstractFromIndex(w.abstract_inverted_index);
+        if(abs) return {input:line, found:true, title:title, source:"OpenAlex", hasAbstract:true, text:rcNormalize(title+" "+abs)};
+        if(doi) return rcFetchAbstract(doi).then(function(fb){
+          return {input:line, found:true, title:title, source:(fb.source||"title only"), hasAbstract:!!fb.text, text:rcNormalize(title+" "+(fb.text||""))};
+        });
+        return {input:line, found:true, title:title, source:"title only", hasAbstract:false, text:rcNormalize(title)};
+      }, function(){ return {input:line, found:false}; });
+  }
+  function runRecallCheck(){
+    var host=$("recallResults"); host.innerHTML="";
+    var lines=($("knownPapers").value||"").split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);
+    if(!lines.length){ host.innerHTML='<div class="sg-note">Add at least one paper: a DOI, an OpenAlex ID, or a title.</div>'; return; }
+    var labeled=[]; (state.concepts||[]).forEach(function(c){ var ts=(c.terms||[]).map(normTerm).filter(Boolean); if(ts.length) labeled.push({label:c.label||"concept", terms:ts}); });
+    if(!labeled.length){ host.innerHTML='<div class="sg-note">Add at least one concept block with a term first, then check recall.</div>'; return; }
+    var blocks=labeled.map(function(x){ return x.terms; });
+    var btn=$("checkRecall"); var myToken=(runRecallCheck._t=(runRecallCheck._t||0)+1);
+    if(btn){ btn.disabled=true; btn.textContent="Checking…"; }
+    var status=document.createElement("div"); status.className="sg-note"; status.textContent="Looking up "+lines.length+" paper"+(lines.length>1?"s":"")+" in OpenAlex…"; host.appendChild(status);
+    Promise.all(lines.map(rcResolveText)).then(function(papers){
+      if(myToken!==runRecallCheck._t) return;
+      host.innerHTML=""; var found=0, retrieved=0, titleOnly=0;
+      papers.forEach(function(p){
+        var row=document.createElement("div"); row.style.padding="8px 0"; row.style.borderTop="1px solid var(--rule)"; row.style.fontSize="13.5px";
+        if(!p||!p.found){ row.innerHTML='<span style="color:var(--danger);font-weight:600">✗ not found</span> in OpenAlex: '+esc(p?p.input:""); host.appendChild(row); return; }
+        found++;
+        if(!p.hasAbstract) titleOnly++;
+        var srcNote = p.hasAbstract
+          ? ('<span style="color:var(--ink-faint)"> · title + abstract via '+esc(p.source)+'</span>')
+          : '<span style="color:var(--ink-faint)"> · title only, no free abstract found</span>';
+        var res=rcCheck(blocks, p.text);
+        if(res.retrieved){ retrieved++; row.innerHTML='<span style="color:var(--scholar-deep);font-weight:600">✓ retrieved</span>&nbsp; '+esc(p.title)+srcNote; }
+        else {
+          var miss=res.missed.map(function(i){ return esc(labeled[i].label); }).join(", ");
+          row.innerHTML='<span style="color:var(--danger);font-weight:600">✗ missed</span>&nbsp; '+esc(p.title)+srcNote
+            +'<div style="color:var(--ink-soft);margin-top:3px">No term matched in: <b>'+miss+'</b>. Add a synonym to that block, then re-check.</div>';
+        }
+        host.appendChild(row);
+      });
+      var sum=document.createElement("div"); sum.className="sg-note"; sum.style.marginTop="10px"; sum.style.fontWeight="600";
+      sum.textContent="Recall: "+retrieved+" of "+found+" known papers retrieved by the current query"
+        +(found<papers.length?(", "+(papers.length-found)+" not found"):"")
+        +(titleOnly?(". "+titleOnly+" had no free abstract and were tested on title only"):"")
+        +". Matching uses freely available title and abstract, so a subscription database's keyword fields may catch a few more.";
+      host.appendChild(sum);
+    }).catch(function(){
+      if(myToken!==runRecallCheck._t) return;
+      host.innerHTML='<div class="sg-note" style="color:var(--danger)">Could not reach OpenAlex to check recall. Check your connection and try again.</div>';
+    }).then(function(){
+      if(btn && myToken===runRecallCheck._t){ btn.disabled=false; btn.textContent="Check recall"; }
+    });
+  }
+  $("checkRecall").addEventListener("click", runRecallCheck);
+
+  // ---- save / share / export wiring ----
+  function gatherState(){
+    return { v:1, topic:$("topic").value, yearFrom:parseInt($("yearFrom").value,10)||null, yearTo:parseInt($("yearTo").value,10)||null,
+      docTypes:selectedDocTypes(), dbs:selectedDBs(),
+      concepts:(state.concepts||[]).map(function(c){ return {label:c.label, terms:(c.terms||[]).slice(), mesh:(c.mesh||[]).slice()}; }), narrower:(state.narrower||[]).slice() };
+  }
+  function setToggles(containerId, attr, values){
+    document.querySelectorAll("#"+containerId+" .toggle").forEach(function(b){ var on=values.indexOf(b.getAttribute(attr))!==-1; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+  }
+  function applyState(obj){
+    if(!obj) return;
+    $("topic").value=obj.topic||"";
+    if(obj.yearFrom!=null) $("yearFrom").value=obj.yearFrom;
+    if(obj.yearTo!=null) $("yearTo").value=obj.yearTo;
+    if(obj.docTypes) setToggles("doctypes","data-dt",obj.docTypes);
+    if(obj.dbs) setToggles("dbtoggles","data-db",obj.dbs);
+    state.concepts=(obj.concepts||[]).map(function(c){ return {label:c.label||"Concept", terms:(c.terms||[]).slice(), mesh:Array.isArray(c.mesh)?c.mesh.slice():[]}; });
+    state.narrower=obj.narrower||[]; state.focus=null;
+    renderConcepts(); renderQueries(); renderNarrower(); updatePrompt();
+  }
+  function qbDownload(filename, text, mime){
+    var blob=new Blob([text], {type:mime||"text/plain"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename;
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); },0);
+  }
+  function currentQueries(){
+    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes(), dbs=selectedDBs(), q={};
+    if(dbs.indexOf("Scopus")!==-1) q.Scopus=buildScopus(bl,y,dts);
+    if(dbs.indexOf("WoS")!==-1) q.WoS=buildWoS(bl,y,dts);
+    if(dbs.indexOf("PubMed")!==-1) q.PubMed=buildPubMed(bl,y,dts).q;
+    if(dbs.indexOf("Scholar")!==-1) q.Scholar=buildScholar(bl,y).q;
+    return q;
+  }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+  if($("shareLink")) $("shareLink").addEventListener("click",function(){
+    var enc=qbEncodeState(gatherState());
+    try{ history.replaceState(null,"","#s="+enc); }catch(e){}
+    copyText(location.origin+location.pathname+"#s="+enc, $("shareLink"), "Copy shareable link");
+  });
+  if($("exportJson")) $("exportJson").addEventListener("click",function(){ qbDownload("search-strategy.json", JSON.stringify(gatherState(),null,2), "application/json"); });
+  if($("loadJson")) $("loadJson").addEventListener("change",function(e){
+    var f=e.target.files&&e.target.files[0]; if(!f) return; var rd=new FileReader();
+    rd.onload=function(){ try{ applyState(JSON.parse(rd.result)); }catch(err){ alert("Could not read that file as a saved search."); } };
+    rd.readAsText(f); e.target.value="";
+  });
+  if($("exportRecord")) $("exportRecord").addEventListener("click",function(){ qbDownload("search-record.md", buildSearchRecord(gatherState(), currentQueries(), todayStr()), "text/markdown"); });
+  if(typeof location!=="undefined"){ var _qbShared=(location.hash||"").match(/[#&]s=([^&]+)/); if(_qbShared){ try{ applyState(qbDecodeState(_qbShared[1])); }catch(e){} } }
+
+  // palette
+  (function(){
+    var host=$("palette");
+    PALETTE.forEach(function(p){
+      var b=document.createElement("button"); b.className="pal-btn"; b.textContent=p.label;
+      b.addEventListener("click",function(){ state.concepts.push({label:p.label, terms:p.terms.slice()}); renderConcepts(); renderQueries(); });
+      host.appendChild(b);
+    });
+  })();
+
+  // copy (delegated for query cards)
+  document.addEventListener("click",function(e){
+    var btn=e.target.closest(".copy"); if(!btn)return;
+    var raw=$(btn.getAttribute("data-target")).getAttribute("data-raw")||"";
+    if(!raw)return; copyText(raw, btn, "Copy");
+  });
+  function copyText(text, btn, label){
+    var done=function(){ btn.textContent="Copied"; btn.classList.add("done"); setTimeout(function(){ btn.textContent=label; btn.classList.remove("done"); },1400); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,function(){ fb(text); done(); }); }
+    else { fb(text); done(); }
+  }
+  function fb(text){ var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); }
+
+  // init
+  document.querySelectorAll(".toggle").forEach(function(b){ b.setAttribute("aria-pressed", b.classList.contains("on")); });
+  updatePrompt();
+  renderConcepts();
+  renderQueries();
+  renderNarrower();
+  renderLinkouts();
+
+  // Expose the pure, DOM-independent core so the automated tests can exercise query
+  // assembly and term scoring directly. This does not change the in-page behaviour.
+  if(typeof window!=="undefined"){
+    window.__QB_CORE__={
+      normTerm:normTerm, blocksFromConcepts:blocksFromConcepts,
+      buildScopus:buildScopus, buildWoS:buildWoS, buildScholar:buildScholar, buildPubMed:buildPubMed,
+      buildIEEE:buildIEEE, buildERIC:buildERIC, buildOvid:buildOvid, buildACM:buildACM, buildEBSCO:buildEBSCO, buildEngVillage:buildEngVillage,
+      simpleQuery:simpleQuery, scholarTerm:scholarTerm, pubmedTerm:pubmedTerm,
+      oaSeed:oaSeed, oaScore:oaScore, oaKeyness:oaKeyness, oaTokens:oaToks, OA_STOP:OA_STOP,
+      rcNormalize:rcNormalize, rcTermMatches:rcTermMatches, rcAbstractFromIndex:rcAbstractFromIndex, rcCheck:rcCheck, rcStripTags:rcStripTags,
+      lintStrategy:lintStrategy,
+      qbEncodeState:qbEncodeState, qbDecodeState:qbDecodeState, buildSearchRecord:buildSearchRecord,
+      SCOPUS_DT:SCOPUS_DT, WOS_DT:WOS_DT, PUBMED_PT:PUBMED_PT
+    };
+  }
+
+})();
+</script>
+</body>
+</html>
