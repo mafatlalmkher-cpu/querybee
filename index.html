@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QueryBee: fielded Boolean search queries for Scopus, Web of Science, PubMed, and Google Scholar</title>
-<meta name="description" content="Free, no-login browser tool that turns a research topic into correctly fielded, fully parenthesized Boolean search queries for Scopus, Web of Science, Google Scholar, and PubMed. Concept-term expansion is kept separate from deterministic, per-engine query assembly.">
+<title>QueryBee: a fielded Boolean query builder for literature search</title>
+<meta name="description" content="Free, no-login browser tool that turns a research topic into correctly fielded, fully parenthesized Boolean search queries for ten literature databases (Scopus, Web of Science, PubMed, Google Scholar, IEEE Xplore, ACM, ERIC, Ovid, EBSCOhost, Engineering Village), with optional MeSH headings for PubMed. Concept-term expansion is kept separate from deterministic, per-engine query assembly.">
 <meta name="author" content="Mafatlal M. Kher">
-<link rel="canonical" href="https://example.org/query-builder/"><!-- TODO: set to the published URL after hosting/repo -->
+<link rel="canonical" href="https://mafatlalmkher-cpu.github.io/querybee/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="QueryBee: fielded Boolean search queries for four databases">
+<meta property="og:title" content="QueryBee: a fielded Boolean query builder for literature search">
 <meta property="og:description" content="Build a literature search, see what it misses, and fix it. Free, runs entirely in your browser, no account or API key.">
-<meta property="og:url" content="https://example.org/query-builder/">
+<meta property="og:url" content="https://mafatlalmkher-cpu.github.io/querybee/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="QueryBee: fielded Boolean search queries for four databases">
-<meta name="twitter:description" content="Free, browser-based, no-login Boolean query builder for Scopus, Web of Science, Google Scholar, and PubMed.">
+<meta name="twitter:title" content="QueryBee: a fielded Boolean query builder for literature search">
+<meta name="twitter:description" content="Free, browser-based, no-login fielded Boolean query builder for ten literature databases.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -21,8 +21,8 @@
   "name": "QueryBee",
   "applicationCategory": "ResearchApplication",
   "operatingSystem": "Any (modern web browser)",
-  "url": "https://example.org/query-builder/",
-  "description": "A free, single-file, browser-based tool that builds correctly fielded Boolean literature-search queries for Scopus, Web of Science, Google Scholar, and PubMed, separating concept-term expansion from deterministic per-engine query assembly.",
+  "url": "https://mafatlalmkher-cpu.github.io/querybee/",
+  "description": "A free, single-file, browser-based tool that builds correctly fielded Boolean literature-search queries for ten databases (Scopus, Web of Science, PubMed, Google Scholar, IEEE Xplore, ACM, ERIC, Ovid, EBSCOhost, Engineering Village), separating concept-term expansion from deterministic per-engine query assembly.",
   "license": "https://opensource.org/licenses/MIT",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -243,7 +243,7 @@
 
   <header class="top">
     <div class="eyebrow">Literature Search · Methods Tool</div>
-    <h1>QueryBee <span class="amp">Boolean &amp; fielded query builder for any field</span></h1>
+    <h1>QueryBee <span class="amp">fielded Boolean query builder for literature search</span></h1>
     <p class="byline" style="margin:2px 0 6px;font-size:13.5px;color:var(--ink-soft)">A free, open tool by <b style="color:var(--ink)">Mafatlal M. Kher</b>, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID</a> &middot; <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">cite this tool</a></p>
     <p class="lede">Describe a topic, expand each concept into terms (with any free AI assistant, or by mining the literature), and the tool assembles correctly fielded, fully parenthesized search strings for <b>Scopus</b>, <b>Web of Science</b>, <b>Google Scholar</b>, and <b>PubMed</b> in each engine's own syntax. The syntax assembly is deterministic and field-agnostic. Treat it as a starting scaffold for a search, not a replacement for a librarian's strategy or for screening; the literature term suggestions are most reliable in well-indexed, English-language fields. No account, no key, no cost, and everything runs in your browser.</p>
     <div class="tag-row">
