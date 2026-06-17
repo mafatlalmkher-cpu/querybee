@@ -1,7 +1,7 @@
 ---
 title: "QueryBee User Manual"
 subtitle: "A browser-based builder for fielded Boolean literature searches"
-author: "Mafatlal M. Kher · Ariel University · ORCID 0000-0001-5600-0040"
+author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel · ORCID 0000-0001-5600-0040"
 date: "Version 1.2.0, June 2026"
 ---
 

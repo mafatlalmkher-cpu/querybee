@@ -1,7 +1,7 @@
 ---
 title: "Searching effectively with QueryBee"
 subtitle: "A short field guide to building searches that find the right papers"
-author: "Mafatlal M. Kher · Ariel University"
+author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel"
 date: "For QueryBee 1.2.0"
 ---
 

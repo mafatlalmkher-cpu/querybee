@@ -1,7 +1,7 @@
 ---
 title: "QueryBee Subject Playbooks"
 subtitle: "Which databases to combine, what to add, and what to avoid, field by field"
-author: "Mafatlal M. Kher · Ariel University"
+author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel"
 date: "For QueryBee 1.2.0"
 ---
 
