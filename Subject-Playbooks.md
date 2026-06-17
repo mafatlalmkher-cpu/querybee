@@ -2,7 +2,7 @@
 title: "QueryBee Subject Playbooks"
 subtitle: "Which databases to combine, what to add, and what to avoid, field by field"
 author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel"
-date: "For QueryBee 1.2.1"
+date: "For QueryBee 1.2.2"
 ---
 
 QueryBee builds the query; this companion tells you, for your field, which databases to combine, which controlled vocabulary to add by hand, how to phrase concepts, and the mistakes that quietly cost recall. No single database covers a field completely, so each recipe names a combination. After building a query, run the recall check against a few papers you already know to confirm the combination is catching them.

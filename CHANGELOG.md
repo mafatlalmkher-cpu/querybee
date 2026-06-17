@@ -3,6 +3,20 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
+## [1.2.2] - 2026-06-18
+
+### Changed
+- Expanded the User Manual so every control has a what-it-does, why-it-matters, how-to-use, and use-and-avoid examples treatment, with subject-specific examples (describe-your-search, concept blocks and starter blocks, the AI-terms step, copy, MeSH, recall check, send-to-more-free-sources, narrow-the-topic, and save/share/document). Documented the strategy review's basis in PRESS and PRISMA-S, and why a reproducible saved search matters.
+
+### Fixed (accessibility and responsive design)
+- Darkened the faint text colour so small captions, per-database notes, and the footer meet WCAG AA contrast.
+- Added disabled-state styling for buttons during async work (term mining, recall check), so a busy control no longer looks clickable.
+- Enlarged the term-chip delete target, the MeSH chips, and the concept-delete control for easier use on touch screens.
+- Added a small-screen breakpoint so padding and spacing adapt on phones.
+- Used the darker engine tones for the active Scopus and Google Scholar database toggles so the white label text meets contrast.
+
+No change to the query-building engine or the test suite (still 21 tests).
+
 ## [1.2.1] - 2026-06-17
 
 ### Changed

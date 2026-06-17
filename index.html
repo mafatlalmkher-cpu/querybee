@@ -35,7 +35,7 @@
 <style>
   :root{
     --paper:#FBF8F3; --paper-2:#F4EEE3;
-    --ink:#211C16; --ink-soft:#6A5F52; --ink-faint:#9A8F80;
+    --ink:#211C16; --ink-soft:#6A5F52; --ink-faint:#7C7062;
     --rule:#E6DDCE; --rule-strong:#D8CCB8;
     --scopus:#C2611A; --scopus-deep:#9C4D12; --scopus-bg:#FBEEE1;
     --wos:#4B2E83; --wos-deep:#3A2266; --wos-bg:#ECE6F5;
@@ -105,9 +105,9 @@
   .toggle{font-size:13.5px;font-weight:500;padding:7px 13px;border-radius:999px;border:1px solid var(--rule-strong);background:var(--paper);color:var(--ink-soft);cursor:pointer;user-select:none;transition:all .14s}
   .toggle:hover{border-color:var(--ink-faint)}
   .toggle.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-  .toggle.db.on[data-db="Scopus"]{background:var(--scopus);border-color:var(--scopus)}
+  .toggle.db.on[data-db="Scopus"]{background:var(--scopus-deep);border-color:var(--scopus-deep)}
   .toggle.db.on[data-db="WoS"]{background:var(--wos);border-color:var(--wos)}
-  .toggle.db.on[data-db="Scholar"]{background:var(--scholar);border-color:var(--scholar)}
+  .toggle.db.on[data-db="Scholar"]{background:var(--scholar-deep);border-color:var(--scholar-deep)}
 
   /* prompt-bridge */
   .bridge{padding:20px 22px;margin-top:0}
@@ -123,6 +123,7 @@
   button.primary:active{transform:translateY(0)}
   button.ghost{font-family:inherit;font-weight:600;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--rule-strong);border-radius:10px;padding:10px 18px;cursor:pointer;transition:all .14s}
   button.ghost:hover{border-color:var(--ink-faint)}
+  button:disabled,.mini:disabled,.copy:disabled,button.primary:disabled,.ex-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;pointer-events:none}
 
   /* reply + concepts */
   .reply-panel{padding:20px 22px}
@@ -142,11 +143,11 @@
   input.concept-label:focus{outline:none;border-bottom-color:var(--rule-strong)}
   .mini{background:none;border:1px solid var(--rule-strong);border-radius:7px;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:12px;padding:5px 9px;transition:all .14s}
   .mini:hover{border-color:var(--go);color:var(--go-deep)}
-  .concept-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;line-height:1;padding:4px;border-radius:6px;transition:color .14s,background .14s}
+  .concept-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:18px;line-height:1;padding:7px;border-radius:6px;transition:color .14s,background .14s}
   .concept-del:hover{color:var(--danger);background:#FBEDEB}
   .chips{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
   .chip{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:13px;background:var(--paper-2);border:1px solid var(--rule-strong);border-radius:7px;padding:5px 6px 5px 10px;color:var(--ink)}
-  .chip button{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;line-height:.8;padding:0 2px;border-radius:4px;transition:color .12s}
+  .chip button{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;line-height:1;padding:0;border-radius:4px;transition:color .12s;min-width:22px;min-height:22px;display:inline-flex;align-items:center;justify-content:center;margin:-2px -2px -2px 0}
   .chip button:hover{color:var(--danger)}
   input.add-term{font-family:"JetBrains Mono",monospace;font-size:13px;border:1px dashed var(--rule-strong);border-radius:7px;padding:5px 10px;background:none;color:var(--ink);min-width:150px}
   input.add-term:focus{outline:none;border-color:var(--go);border-style:solid}
@@ -205,7 +206,7 @@
   .mesh-sug{margin-top:9px;display:flex;flex-direction:column;gap:8px}
   .meshlab{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
   .meshchips{display:flex;flex-wrap:wrap;gap:5px}
-  .meshchip{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:12px;padding:2px 10px;cursor:pointer}
+  .meshchip{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:12px;padding:5px 12px;cursor:pointer}
   .meshchip:hover{background:var(--pubmed-bg)}
   .meshchip.on{background:var(--pubmed);color:#fff;border-color:var(--pubmed)}
   .meshmsg{font-size:12px;color:var(--ink-faint)}
@@ -236,6 +237,16 @@
 
   footer.foot{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-faint);line-height:1.6}
   footer.foot b{color:var(--ink-soft);font-weight:600}
+  @media(max-width:560px){
+    .wrap{padding:0 16px 64px}
+    header.top{padding:30px 0 20px;margin-bottom:24px}
+    .input-panel{padding:16px}
+    .bridge{padding:16px}
+    .reply-panel{padding:16px}
+    .morewrap{padding:16px}
+    .filters{gap:16px}
+    .step{margin-bottom:28px}
+  }
 </style>
 </head>
 <body>
@@ -508,7 +519,7 @@
   <footer class="foot">
     <p><b>How it works.</b> The query syntax for each database is assembled by the tool itself, so the fielded structure is consistent and editable. The AI step only expands a topic into concept terms, and it runs in whatever chatbot you already use, so the tool needs no API key and costs nothing. Multi-word terms are quoted as phrases, and a trailing asterisk truncates word stems in Scopus, Web of Science, and PubMed. Google Scholar does not support stem truncation, so the asterisk is removed from the Scholar query automatically.</p>
     <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external request is the optional find-terms helper, which mines candidate terms from the OpenAlex scholarly database (free, no account, no key) and falls back to a public dictionary or fails quietly when offline, so the core query builder always works.</p>
-    <p class="cred"><b>QueryBee</b> v1.2.0 &middot; developed by Mafatlal M. Kher, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
+    <p class="cred"><b>QueryBee</b> v1.2.2 &middot; developed by Mafatlal M. Kher, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
   </footer>
 
 </div>
