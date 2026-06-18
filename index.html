@@ -37,6 +37,7 @@
     --paper:#FBF8F3; --paper-2:#F4EEE3;
     --ink:#211C16; --ink-soft:#6A5F52; --ink-faint:#7C7062;
     --rule:#E6DDCE; --rule-strong:#D8CCB8;
+    --scopus-line:#E8C9A8; --wos-line:#CDBEE8; --scholar-line:#B9D9C7; --pubmed-line:#A9CBE3;
     --scopus:#C2611A; --scopus-deep:#9C4D12; --scopus-bg:#FBEEE1;
     --wos:#4B2E83; --wos-deep:#3A2266; --wos-bg:#ECE6F5;
     --scholar:#2A6F4E; --scholar-deep:#1E5439; --scholar-bg:#E4F0E9;
@@ -57,7 +58,7 @@
       radial-gradient(circle at 10% -5%, rgba(194,97,26,.05), transparent 36%),
       radial-gradient(circle at 90% 0%, rgba(75,46,131,.05), transparent 38%),
       radial-gradient(circle at 50% 120%, rgba(42,111,78,.045), transparent 40%);
-    background-attachment:fixed;
+    background-attachment:scroll;
   }
   .wrap{max-width:1080px;margin:0 auto;padding:0 26px 90px}
 
@@ -70,9 +71,9 @@
   .tag-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;opacity:0;animation:rise .7s .28s ease forwards}
   .db-tag{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;border:1px solid}
   .db-tag::before{content:"";width:8px;height:8px;border-radius:50%}
-  .db-tag.s{color:var(--scopus-deep);border-color:#E8C9A8;background:var(--scopus-bg)} .db-tag.s::before{background:var(--scopus)}
-  .db-tag.w{color:var(--wos-deep);border-color:#CDBEE8;background:var(--wos-bg)} .db-tag.w::before{background:var(--wos)}
-  .db-tag.g{color:var(--scholar-deep);border-color:#B9D9C7;background:var(--scholar-bg)} .db-tag.g::before{background:var(--scholar)}
+  .db-tag.s{color:var(--scopus-deep);border-color:var(--scopus-line);background:var(--scopus-bg)} .db-tag.s::before{background:var(--scopus)}
+  .db-tag.w{color:var(--wos-deep);border-color:var(--wos-line);background:var(--wos-bg)} .db-tag.w::before{background:var(--wos)}
+  .db-tag.g{color:var(--scholar-deep);border-color:var(--scholar-line);background:var(--scholar-bg)} .db-tag.g::before{background:var(--scholar)}
   .db-tag.free{color:var(--ink-soft);border-color:var(--rule-strong);background:#fff} .db-tag.free::before{display:none}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
@@ -81,7 +82,7 @@
   .step-num{font-family:"Fraunces",serif;font-size:15px;font-weight:600;color:var(--paper);background:var(--ink);width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transform:translateY(3px)}
   .step-num.opt{background:#fff;color:var(--ink);border:1.5px solid var(--rule-strong);font-size:11px}
   .step-title{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:-.01em;margin:0}
-  .opt-pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--scholar-deep);background:var(--scholar-bg);border:1px solid #B9D9C7;border-radius:999px;padding:2px 9px;margin-left:8px;transform:translateY(-2px);display:inline-block}
+  .opt-pill{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--scholar-deep);background:var(--scholar-bg);border:1px solid var(--scholar-line);border-radius:999px;padding:2px 9px;margin-left:8px;transform:translateY(-2px);display:inline-block}
   .step-sub{color:var(--ink-soft);font-size:14px;margin:3px 0 0 39px}
 
   .panel{background:#fff;border:1px solid var(--rule);border-radius:16px;box-shadow:var(--shadow)}
@@ -113,7 +114,7 @@
   .bridge{padding:20px 22px;margin-top:0}
   .bridge .how{font-size:13.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.55}
   .bridge .how b{color:var(--ink);font-weight:600}
-  pre.prompt{margin:0;background:#FCFAF6;border:1px solid var(--rule-strong);border-radius:11px;padding:15px 16px;font-family:"JetBrains Mono",monospace;font-size:12.6px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--ink);max-height:300px;overflow:auto}
+  pre.prompt{margin:0;background:#FCFAF6;border:1px solid var(--rule-strong);border-radius:11px;padding:15px 16px;font-family:"JetBrains Mono",monospace;font-size:12.6px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);max-height:300px;overflow:auto}
   .bridge-foot{display:flex;align-items:center;gap:14px;margin-top:13px;flex-wrap:wrap}
   .where{font-size:12.5px;color:var(--ink-faint)}
   .where b{color:var(--ink-soft);font-weight:600}
@@ -133,7 +134,7 @@
   .reply-foot{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap}
   .reply-note{font-size:12.5px;color:var(--ink-faint);max-width:40ch}
   .parse-msg{display:none;margin-top:11px;font-size:13px;border-radius:9px;padding:9px 13px}
-  .parse-msg.ok{display:block;background:var(--scholar-bg);border:1px solid #B9D9C7;color:var(--scholar-deep)}
+  .parse-msg.ok{display:block;background:var(--scholar-bg);border:1px solid var(--scholar-line);color:var(--scholar-deep)}
   .parse-msg.bad{display:block;background:#FBEDEB;border:1px solid #E6C2BC;color:var(--danger)}
 
   .concept{background:#fff;border:1px solid var(--rule);border-radius:13px;padding:15px 16px 16px;margin-bottom:13px;box-shadow:var(--shadow)}
@@ -161,7 +162,7 @@
   .add-concept:hover{border-color:var(--go);color:var(--go-deep)}
 
   .palette{margin-top:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:12px;padding:15px 16px}
-  .palette h4{font-family:"Fraunces",serif;font-weight:600;font-size:14.5px;margin:0 0 4px}
+  .palette h3{font-family:"Fraunces",serif;font-weight:600;font-size:14.5px;margin:0 0 4px}
   .palette p{font-size:12.5px;color:var(--ink-soft);margin:0 0 11px}
   .palette-grid{display:flex;flex-wrap:wrap;gap:8px}
   .pal-btn{background:#fff;border:1px solid var(--rule-strong);border-radius:9px;padding:8px 13px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;transition:all .14s}
@@ -177,13 +178,16 @@
   .qname{display:flex;flex-direction:column;gap:1px}
   .qname .db{font-family:"Fraunces",serif;font-weight:600;font-size:18px}
   .qcard.s .qname .db{color:var(--scopus-deep)} .qcard.w .qname .db{color:var(--wos-deep)} .qcard.g .qname .db{color:var(--scholar-deep)}
+  .qcard.s .qname .db,.qcard.w .qname .db,.qcard.g .qname .db,.qcard.p .qname .db{display:inline-flex;align-items:center;gap:7px}
+  .qcard.s .qname .db::before,.qcard.w .qname .db::before,.qcard.g .qname .db::before,.qcard.p .qname .db::before{content:"";width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .qcard.s .qname .db::before{background:var(--scopus)} .qcard.w .qname .db::before{background:var(--wos)} .qcard.g .qname .db::before{background:var(--scholar)} .qcard.p .qname .db::before{background:var(--pubmed)}
   .qname .mode{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em}
   .copy{font-family:inherit;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 13px;cursor:pointer;border:1px solid;transition:all .14s;background:#fff}
-  .qcard.s .copy{color:var(--scopus-deep);border-color:#E3C09C} .qcard.s .copy:hover{background:var(--scopus-bg)}
-  .qcard.w .copy{color:var(--wos-deep);border-color:#C9B8E6} .qcard.w .copy:hover{background:var(--wos-bg)}
-  .qcard.g .copy{color:var(--scholar-deep);border-color:#B9D9C7} .qcard.g .copy:hover{background:var(--scholar-bg)}
+  .qcard.s .copy{color:var(--scopus-deep);border-color:var(--scopus-line)} .qcard.s .copy:hover{background:var(--scopus-bg)}
+  .qcard.w .copy{color:var(--wos-deep);border-color:var(--wos-line)} .qcard.w .copy:hover{background:var(--wos-bg)}
+  .qcard.g .copy{color:var(--scholar-deep);border-color:var(--scholar-line)} .qcard.g .copy:hover{background:var(--scholar-bg)}
   .copy.done{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important}
-  pre.qstr{margin:0;padding:0 16px 12px;font-family:"JetBrains Mono",monospace;font-size:12.7px;line-height:1.65;white-space:pre-wrap;word-break:break-word;color:var(--ink);flex:1}
+  pre.qstr{margin:0;padding:0 16px 12px;font-family:"JetBrains Mono",monospace;font-size:12.7px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);flex:1}
   pre.qstr .fld{font-weight:500}
   .qcard.s pre.qstr .fld{color:var(--scopus-deep)} .qcard.w pre.qstr .fld{color:var(--wos-deep)}
   pre.qstr .op{color:var(--ink-faint);font-weight:500}
@@ -194,26 +198,26 @@
   .qcard.s .qfoot a{color:var(--scopus-deep)} .qcard.w .qfoot a{color:var(--wos-deep)} .qcard.g .qfoot a{color:var(--scholar-deep)}
   .qcard.p .qbar{background:var(--pubmed)}
   .qcard.p .qname .db{color:var(--pubmed-deep)}
-  .qcard.p .copy{color:var(--pubmed-deep);border-color:#A9CBE3} .qcard.p .copy:hover{background:var(--pubmed-bg)}
+  .qcard.p .copy{color:var(--pubmed-deep);border-color:var(--pubmed-line)} .qcard.p .copy:hover{background:var(--pubmed-bg)}
   .qcard.p pre.qstr .fld{color:var(--pubmed-deep)}
   .qcard.p .qfoot a{color:var(--pubmed-deep)}
   .mesh{margin-top:10px;border-top:1px dashed var(--rule-strong);padding-top:9px}
   .mesh-top{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
-  .mesh-btn{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+  .mesh-btn{font-size:12px;border:1px solid var(--pubmed-line);color:var(--pubmed-deep);background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
   .mesh-btn:hover{background:var(--pubmed-bg)}
   .mesh-hint{font-size:11.5px;line-height:1.45;color:var(--ink-faint);flex:1;min-width:200px}
   .mesh-hint code{background:var(--pubmed-bg);color:var(--pubmed-deep);padding:0 3px;border-radius:3px;font-size:11px}
   .mesh-sug{margin-top:9px;display:flex;flex-direction:column;gap:8px}
   .meshlab{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
   .meshchips{display:flex;flex-wrap:wrap;gap:5px}
-  .meshchip{font-size:12px;border:1px solid #A9CBE3;color:var(--pubmed-deep);background:#fff;border-radius:12px;padding:5px 12px;cursor:pointer}
+  .meshchip{font-size:12px;border:1px solid var(--pubmed-line);color:var(--pubmed-deep);background:#fff;border-radius:12px;padding:5px 12px;cursor:pointer}
   .meshchip:hover{background:var(--pubmed-bg)}
   .meshchip.on{background:var(--pubmed);color:#fff;border-color:var(--pubmed)}
   .meshmsg{font-size:12px;color:var(--ink-faint)}
   .meshmsg.warn{color:#9a6a00}
 
   .morewrap{margin-top:18px;background:#fff;border:1px solid var(--rule);border-radius:13px;padding:18px 20px;box-shadow:var(--shadow)}
-  .morewrap h4{font-family:"Fraunces",serif;font-weight:600;font-size:15.5px;margin:0 0 5px}
+  .morewrap h3{font-family:"Fraunces",serif;font-weight:600;font-size:15.5px;margin:0 0 5px}
   .morewrap p{font-size:13px;color:var(--ink-soft);margin:0 0 14px;line-height:1.55;max-width:74ch}
   .more-group{margin-bottom:13px}
   .more-group:last-child{margin-bottom:0}
@@ -224,7 +228,7 @@
   .more-links a.off{opacity:.4;pointer-events:none}
 
   .qnote{margin-top:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:12px;padding:15px 18px}
-  .qnote h4{font-family:"Fraunces",serif;font-weight:600;font-size:15px;margin:0 0 7px}
+  .qnote h3{font-family:"Fraunces",serif;font-weight:600;font-size:15px;margin:0 0 7px}
   .qnote p{margin:0 0 8px;font-size:13.5px;color:var(--ink-soft);line-height:1.55}
   .qnote p:last-child{margin-bottom:0}
   .qnote code{font-family:"JetBrains Mono",monospace;font-size:12px;background:#fff;border:1px solid var(--rule);border-radius:5px;padding:1px 5px;color:var(--ink)}
@@ -251,6 +255,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div id="srLive" class="visually-hidden" aria-live="polite"></div>
 
   <header class="top">
     <div class="eyebrow">Literature Search · Methods Tool</div>
@@ -291,12 +296,12 @@
       </div>
 
       <div class="filters">
-        <div class="fgroup">
-          <span class="flabel">Publication years</span>
+        <div class="fgroup" role="group" aria-labelledby="fg-years">
+          <span class="flabel" id="fg-years">Publication years</span>
           <div class="year-row"><input type="number" id="yearFrom" aria-label="Publication year from" value="2000" min="1800" max="2100"><span>to</span><input type="number" id="yearTo" aria-label="Publication year to" value="2026" min="1800" max="2100"></div>
         </div>
-        <div class="fgroup">
-          <span class="flabel">Document types</span>
+        <div class="fgroup" role="group" aria-labelledby="fg-doctypes">
+          <span class="flabel" id="fg-doctypes">Document types</span>
           <div class="chiprow" id="doctypes">
             <button class="toggle on" data-dt="Article">Article</button>
             <button class="toggle on" data-dt="Review">Review</button>
@@ -311,8 +316,8 @@
             <button class="toggle" data-dt="Erratum">Erratum</button>
           </div>
         </div>
-        <div class="fgroup">
-          <span class="flabel">Build queries for</span>
+        <div class="fgroup" role="group" aria-labelledby="fg-dbs">
+          <span class="flabel" id="fg-dbs">Build queries for</span>
           <div class="chiprow" id="dbtoggles">
             <button class="toggle db on" data-db="Scopus">Scopus</button>
             <button class="toggle db on" data-db="WoS">Web of Science</button>
@@ -332,7 +337,7 @@
 
   <!-- STEP 2 -->
   <section class="step">
-    <div class="step-head"><span class="step-num opt">2</span><h2 class="step-title">Get terms from your AI assistant<span class="opt-pill">optional</span></h2></div>
+    <div class="step-head"><span class="step-num">2</span><h2 class="step-title">Get terms from your AI assistant<span class="opt-pill">optional</span></h2></div>
     <p class="step-sub">Works with the free version of Claude, ChatGPT, Gemini, or any chatbot. No AI account? Skip to step 3 and add terms by hand or load an example block.</p>
     <div class="panel bridge">
       <p class="how"><b>1.</b> Copy this prompt. <b>2.</b> Paste it into your AI assistant. <b>3.</b> Copy the assistant's full reply and paste it into step 3.</p>
@@ -366,7 +371,7 @@
     <button class="add-concept" id="addConcept">+ Add a concept block</button>
 
     <div class="palette">
-      <h4>Starter blocks (any field)</h4>
+      <h3>Starter blocks (any field)</h3>
       <p>Click to drop in a ready-made block, then edit. These show the pattern; the AI step in step 2 builds terms for any topic.</p>
       <div class="palette-grid" id="palette"></div>
     </div>
@@ -449,13 +454,13 @@
     </div>
 
     <div class="qnote">
-      <h4>Strategy review · PRESS / PRISMA-S</h4>
+      <h3>Strategy review · PRESS / PRISMA-S</h3>
       <p id="lintEmpty" style="margin:0;font-size:13.5px;color:var(--ink-soft)">Add concept blocks above and this panel flags gaps against peer-review-of-search criteria as you build.</p>
       <div id="lintResults" aria-live="polite"></div>
     </div>
 
     <div class="morewrap">
-      <h4>Send the same search to more free sources</h4>
+      <h3>Send the same search to more free sources</h3>
       <p>These open with your concept query as a plain full-text search. They do not take fielded Boolean, so use them for discovery, not the systematic search of record. Build at least one concept block above to activate the links.</p>
       <div class="more-group">
         <span class="more-label">Open-access papers &amp; preprints</span>
@@ -472,7 +477,7 @@
     </div>
 
     <div class="qnote">
-      <h4>What the tool applies, and what to watch</h4>
+      <h3>What the tool applies, and what to watch</h3>
       <p>Each concept sits in its own field code and the blocks are joined only with <code>AND</code>, so operator precedence cannot regroup the logic. Keep that habit: precedence rules differ between engines and Scopus changed its order recently, so parenthesize every block rather than trusting defaults. Date and document-type filters are translated per engine: Scopus uses exclusive <code>PUBYEAR &gt; / &lt;</code> and codes such as <code>ar</code>, <code>re</code>; Web of Science uses an inclusive <code>PY=()</code> range and full names such as <code>Article</code>, <code>Review</code>, <code>Proceedings Paper</code>.</p>
       <p>The two subscription databases will not return the same count. Web of Science <code>TS=</code> also searches Keyword Plus, index terms generated from the references a paper cites, which Scopus <code>TITLE-ABS-KEY</code> has no equivalent for. The gap is why searching both improves recall.</p>
       <p>Google Scholar is different in kind. It searches full text, not separate title, abstract, and keyword fields, it has no document-type filter, it does not support stem truncation (its asterisk is a whole-word placeholder), and it cuts off queries beyond about 256 characters. The tool therefore removes truncation asterisks from the Scholar query, shows the character count, and warns when a Scholar query runs long. Treat Scholar as fast, free scoping, not the systematic search of record, and trim terms to the core concepts for that panel.</p>
@@ -519,7 +524,7 @@
   <footer class="foot">
     <p><b>How it works.</b> The query syntax for each database is assembled by the tool itself, so the fielded structure is consistent and editable. The AI step only expands a topic into concept terms, and it runs in whatever chatbot you already use, so the tool needs no API key and costs nothing. Multi-word terms are quoted as phrases, and a trailing asterisk truncates word stems in Scopus, Web of Science, and PubMed. Google Scholar does not support stem truncation, so the asterisk is removed from the Scholar query automatically.</p>
     <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external request is the optional find-terms helper, which mines candidate terms from the OpenAlex scholarly database (free, no account, no key) and falls back to a public dictionary or fails quietly when offline, so the core query builder always works.</p>
-    <p class="cred"><b>QueryBee</b> v1.2.2 &middot; developed by Mafatlal M. Kher, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
+    <p class="cred"><b>QueryBee</b> v1.2.3 &middot; developed by Mafatlal M. Kher, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
   </footer>
 
 </div>
@@ -1401,7 +1406,7 @@
     b.addEventListener("click",function(){ $("topic").value=EXAMPLES[b.getAttribute("data-ex")]||""; state.focus=null; updatePrompt(); $("topic").focus(); });
   });
 
-  $("copyPrompt").addEventListener("click",function(){ copyText($("promptBox").textContent, $("copyPrompt"), "Copy prompt"); });
+  $("copyPrompt").addEventListener("click",function(){ copyText($("promptBox").textContent, $("copyPrompt"), "Copy prompt"); gcEvent("copy/prompt"); });
 
   $("parseReply").addEventListener("click",function(){
     var obj=parseReply($("aiReply").value);
@@ -1510,7 +1515,7 @@
       if(btn && myToken===runRecallCheck._t){ btn.disabled=false; btn.textContent="Check recall"; }
     });
   }
-  $("checkRecall").addEventListener("click", runRecallCheck);
+  $("checkRecall").addEventListener("click", function(){ runRecallCheck(); gcEvent("recall-check"); });
 
   // ---- save / share / export wiring ----
   function gatherState(){
@@ -1550,14 +1555,15 @@
     var enc=qbEncodeState(gatherState());
     try{ history.replaceState(null,"","#s="+enc); }catch(e){}
     copyText(location.origin+location.pathname+"#s="+enc, $("shareLink"), "Copy shareable link");
+    gcEvent("share-link");
   });
-  if($("exportJson")) $("exportJson").addEventListener("click",function(){ qbDownload("search-strategy.json", JSON.stringify(gatherState(),null,2), "application/json"); });
+  if($("exportJson")) $("exportJson").addEventListener("click",function(){ qbDownload("search-strategy.json", JSON.stringify(gatherState(),null,2), "application/json"); gcEvent("export/json"); });
   if($("loadJson")) $("loadJson").addEventListener("change",function(e){
     var f=e.target.files&&e.target.files[0]; if(!f) return; var rd=new FileReader();
     rd.onload=function(){ try{ applyState(JSON.parse(rd.result)); }catch(err){ alert("Could not read that file as a saved search."); } };
     rd.readAsText(f); e.target.value="";
   });
-  if($("exportRecord")) $("exportRecord").addEventListener("click",function(){ qbDownload("search-record.md", buildSearchRecord(gatherState(), currentQueries(), todayStr()), "text/markdown"); });
+  if($("exportRecord")) $("exportRecord").addEventListener("click",function(){ qbDownload("search-record.md", buildSearchRecord(gatherState(), currentQueries(), todayStr()), "text/markdown"); gcEvent("export/prisma-record"); });
   if(typeof location!=="undefined"){ var _qbShared=(location.hash||"").match(/[#&]s=([^&]+)/); if(_qbShared){ try{ applyState(qbDecodeState(_qbShared[1])); }catch(e){} } }
 
   // palette
@@ -1571,13 +1577,16 @@
   })();
 
   // copy (delegated for query cards)
+  var _dbNameMap={scopusStr:"Scopus",wosStr:"WoS",scholarStr:"Google Scholar",pubmedStr:"PubMed",ieeeStr:"IEEE",acmStr:"ACM",ericStr:"ERIC",ovidStr:"Ovid",ebscoStr:"EBSCO",evStr:"Eng Village"};
   document.addEventListener("click",function(e){
     var btn=e.target.closest(".copy"); if(!btn)return;
-    var raw=$(btn.getAttribute("data-target")).getAttribute("data-raw")||"";
+    var tgt=btn.getAttribute("data-target");
+    var raw=$(tgt).getAttribute("data-raw")||"";
     if(!raw)return; copyText(raw, btn, "Copy");
+    gcEvent("copy/"+(_dbNameMap[tgt]||tgt));
   });
   function copyText(text, btn, label){
-    var done=function(){ btn.textContent="Copied"; btn.classList.add("done"); setTimeout(function(){ btn.textContent=label; btn.classList.remove("done"); },1400); };
+    var done=function(){ btn.textContent="Copied"; btn.classList.add("done"); var _sr=document.getElementById("srLive"); if(_sr){ var _c=btn.closest(".qcard"), _db=_c&&_c.querySelector(".db"); _sr.textContent=_db?(_db.textContent+" query copied to clipboard"):"Copied to clipboard"; } setTimeout(function(){ btn.textContent=label; btn.classList.remove("done"); },1400); };
     if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,function(){ fb(text); done(); }); }
     else { fb(text); done(); }
   }
@@ -1608,6 +1617,13 @@
   }
 
 })();
+
+// ── Anonymous usage analytics (GoatCounter — no cookies, no PII, GDPR-ok) ──
+// Tracks: page views, query copies by database, recall checks, share-link use.
+// Sign up free at https://www.goatcounter.com and replace YOURSITE below.
+function gcEvent(name){ if(window.goatcounter&&goatcounter.count) goatcounter.count({path:"event/"+name, title:name, event:true}); }
 </script>
+<script data-goatcounter="https://YOURSITE.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

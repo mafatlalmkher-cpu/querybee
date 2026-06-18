@@ -2,7 +2,7 @@
 title: "Searching effectively with QueryBee"
 subtitle: "A short field guide to building searches that find the right papers"
 author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel"
-date: "For QueryBee 1.2.2"
+date: "For QueryBee 1.2.3"
 ---
 
 The User Manual tells you what each control does. This guide tells you how to build a search that actually finds the right papers. QueryBee guarantees correct syntax for you, so your effort goes into the two things it cannot decide: the words you choose, and how you group them.

@@ -3,6 +3,22 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
+## [1.2.3] - 2026-06-18
+
+### Fixed (accessibility and design)
+- Filter clusters (publication years, document types, databases) are now labelled groups (`role="group"` with `aria-labelledby`) for screen-reader navigation.
+- In-step panel headings corrected from `<h4>` to `<h3>` so the document outline has no skipped heading level.
+- Each colour-coded engine card (Scopus, Web of Science, Google Scholar, PubMed) now shows a colour dot before the engine name, so engines are distinguished by shape and text, not colour alone.
+- Copying a query announces "[engine] query copied to clipboard" through a visually-hidden live region.
+
+### Changed
+- Engine border tints moved to CSS tokens (`--scopus-line`, `--wos-line`, `--scholar-line`, `--pubmed-line`); two drifted copy-button tints unified.
+- Dropped `background-attachment:fixed` (ignored on iOS Safari, can cause repaint jank).
+- Unified the optional-step signifier: step 2's number is solid like the others, leaving the green pill as the single marker.
+- Query blocks use `overflow-wrap:anywhere` instead of the non-standard `word-break:break-word`.
+
+No change to the query-building engine or the test suite (still 21 tests).
+
 ## [1.2.2] - 2026-06-18
 
 ### Changed
