@@ -251,6 +251,20 @@
     .filters{gap:16px}
     .step{margin-bottom:28px}
   }
+  /* ── Direct LLM API panel ── */
+  .ai-direct{margin-top:12px;border-radius:10px;border:1px solid var(--rule-strong)}
+  .ai-direct>summary{cursor:pointer;padding:11px 15px;list-style:none;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--ink);border-radius:10px;background:var(--paper-2);user-select:none}
+  .ai-direct>summary::-webkit-details-marker{display:none}
+  .ai-direct[open]>summary{border-radius:10px 10px 0 0;border-bottom:1px solid var(--rule)}
+  .ai-direct-body{padding:14px 16px}
+  .ai-fields{display:grid;gap:10px;margin-bottom:14px}
+  .ai-fields label{font-size:13px;color:var(--ink-soft);display:flex;flex-direction:column;gap:4px;font-weight:500}
+  .ai-fields select,.ai-fields input[type=text],.ai-fields input[type=password]{border:1px solid var(--rule-strong);border-radius:8px;padding:8px 10px;font-size:13.5px;background:var(--paper);color:var(--ink);font-family:inherit;width:100%;box-sizing:border-box}
+  .ai-fields select:focus,.ai-fields input:focus{outline:none;border-color:var(--go);box-shadow:0 0 0 3px rgba(22,105,92,.13)}
+  .ai-direct-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  #aiStatus{font-size:13.5px;color:var(--ink-soft)}
+  #aiStatus.err{color:#c0392b}
+  .ai-key-note{font-size:11.5px;color:var(--ink-faint);font-weight:400}
 </style>
 </head>
 <body>
@@ -293,6 +307,10 @@
         <button class="ex-btn" data-ex="ml">deep learning crop disease</button>
         <button class="ex-btn" data-ex="cancer">tumor immunotherapy resistance</button>
         <button class="ex-btn" data-ex="bat">solid-state battery electrolyte</button>
+      </div>
+      <div class="ex-row" style="margin-top:10px">
+        <button class="primary" id="draftBlocks" type="button">Draft concept blocks from this</button>
+        <span class="where" style="margin-left:10px">Offline, no AI. A rough first split you then screen and expand. For richer terms, use step 2 or <b>find terms in literature</b>.</span>
       </div>
 
       <div class="filters">
@@ -351,6 +369,38 @@
         <span class="where">Free chatbots that work: <b>claude.ai</b>, <b>chatgpt.com</b>, <b>gemini.google.com</b></span>
       </div>
     </div>
+    <details class="ai-direct" id="aiDirectPanel">
+      <summary>⚡ Generate directly with an API key <span class="opt-pill">no copy-paste</span></summary>
+      <div class="ai-direct-body">
+        <p style="margin:0 0 12px;font-size:13.5px;color:var(--ink-soft)">Enter your API key to call the AI directly — no copy-paste needed. The key is saved only in this browser and is never sent to our servers. Supports OpenAI, Anthropic Claude, a local Ollama model, or any OpenAI-compatible endpoint.</p>
+        <div class="ai-fields">
+          <label>Provider
+            <select id="aiProvider">
+              <option value="openai">OpenAI (GPT-4o-mini · GPT-4o)</option>
+              <option value="anthropic">Anthropic (Claude Haiku / Sonnet)</option>
+              <option value="ollama">Ollama — local model, no key needed</option>
+              <option value="custom">Custom OpenAI-compatible endpoint</option>
+            </select>
+          </label>
+          <label id="aiKeyRow">API key <span class="ai-key-note">(stored locally in this browser only — never sent to our servers)</span>
+            <input type="password" id="aiKey" placeholder="sk-…" autocomplete="off" spellcheck="false">
+          </label>
+          <label>Model <span class="ai-key-note">(leave blank to use the provider default)</span>
+            <input type="text" id="aiModel" placeholder="gpt-4o-mini">
+          </label>
+          <label id="aiEndpointRow" style="display:none">Endpoint URL
+            <input type="text" id="aiEndpoint" placeholder="http://localhost:11434/v1/chat/completions">
+          </label>
+        </div>
+        <div class="ai-direct-foot">
+          <button class="primary" id="aiGenerate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Generate concept blocks
+          </button>
+          <span id="aiStatus"></span>
+        </div>
+      </div>
+    </details>
   </section>
 
   <!-- STEP 3 -->
@@ -561,7 +611,7 @@
   ];
 
   var $ = function(id){ return document.getElementById(id); };
-  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#x27;"); }
 
   // A term stays bare only if it is a "safe" token: letters/digits with internal hyphens
   // or dots and an optional single trailing truncation asterisk (for example PD-1,
@@ -681,7 +731,7 @@
   }
   function buildERIC(blocks){
     if(!blocks.length) return "";
-    return blocks.map(function(ts){ return "("+ts.map(function(t){ return "title:"+t+" OR abstract:"+t; }).join(" OR ")+")"; }).join(" AND ");
+    return blocks.map(function(ts){ return "("+ts.map(function(t){ return "ti:"+t+" OR ab:"+t; }).join(" OR ")+")"; }).join(" AND ");
   }
   function ovidTerm(t){ return t.replace(/\*/g,"$"); }
   function buildOvid(blocks){
@@ -783,27 +833,39 @@
   function qbDecodeState(str){
     var b64=String(str||"").replace(/-/g,"+").replace(/_/g,"/");
     while(b64.length%4) b64+="=";
-    return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    try{ return JSON.parse(decodeURIComponent(escape(atob(b64)))); }
+    catch(e){ throw new Error("Shared link is corrupted or was generated by a different version of QueryBee."); }
   }
   function qbField(label, val){ return val ? ("**"+label+":** "+val+"\n") : ""; }
+  var QB_VERSION="1.2.3";
+  // Deterministic 32-bit FNV-1a fingerprint of the meaningful inputs, so a record is tied to an exact
+  // term set and limits. Same inputs always produce the same fingerprint: the reproducibility guarantee.
+  function qbHash(s){ s=String(s); var h=2166136261>>>0; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return ("0000000"+h.toString(16)).slice(-8); }
+  // Database id to display label, in canonical order, covering every engine QueryBee builds for, so the
+  // record lists the full strategy for all databases searched (PRISMA-S item 8 / PRISMA 2020 item 7).
+  var QB_DB_LABELS=[["Scopus","Scopus (Advanced Search)"],["WoS","Web of Science (Advanced Search)"],["PubMed","PubMed"],["Scholar","Google Scholar (scoping search, not a search of record)"],["IEEE","IEEE Xplore"],["ACM","ACM Digital Library"],["ERIC","ERIC (ProQuest)"],["Ovid","Ovid (Embase, PsycINFO, MEDLINE, CAB Abstracts)"],["EBSCO","EBSCOhost (CINAHL, SocINDEX, and similar)"],["EngVillage","Engineering Village (Compendex, Inspec, GeoRef)"]];
   function buildSearchRecord(st, queries, dateStr){
     st=st||{}; queries=queries||{};
+    var fp=qbHash(JSON.stringify({c:(st.concepts||[]).map(function(c){return (c.terms||[]).filter(Boolean);}), yf:st.yearFrom||null, yt:st.yearTo||null, dt:st.docTypes||[], db:st.dbs||[]}));
     var L=[];
     L.push("# Literature search record","");
     L.push(qbField("Date of search", dateStr));
+    L.push(qbField("Tool", "QueryBee v"+QB_VERSION));
+    L.push(qbField("Search fingerprint", fp+" (the same terms and limits always reproduce this query)"));
     L.push(qbField("Topic", (st.topic||"").trim()||"(not given)"));
     var yr=(st.yearFrom||st.yearTo)?("from "+(st.yearFrom||"earliest")+" to "+(st.yearTo||"latest")):"no limit";
     L.push(qbField("Publication years", yr));
     L.push(qbField("Document types", (st.docTypes||[]).join(", ")||"any"));
     L.push(qbField("Databases searched", (st.dbs||[]).join(", ")||"(none selected)"));
+    L.push(qbField("Search peer review", "Automated PRESS / PRISMA-S strategy review (QueryBee). Independent human peer review recommended."));
     L.push("","## Concepts and terms","");
     (st.concepts||[]).forEach(function(c,i){ var ts=(c.terms||[]).filter(Boolean); if(ts.length){ var line=(i+1)+". **"+(c.label||("Concept "+(i+1)))+":** "+ts.join("; "); var mh=(c.mesh||[]).filter(Boolean); if(mh.length) line+="  \n    PubMed MeSH headings: "+mh.join("; "); L.push(line); } });
     L.push("","## Full search strings","");
-    [["Scopus","Scopus (Advanced Search)"],["WoS","Web of Science (Advanced Search)"],["PubMed","PubMed"],["Scholar","Google Scholar (scoping search, not a search of record)"]].forEach(function(p){ var q=queries[p[0]]; if(q){ L.push("### "+p[1],"","```",q,"```",""); } });
+    QB_DB_LABELS.forEach(function(p){ var q=queries[p[0]]; if(q){ L.push("### "+p[1],"","```",q,"```",""); } });
     L.push("## Records retrieved (fill in)","");
     (st.dbs||[]).forEach(function(d){ L.push("- "+d+": ____"); });
     L.push("","## Notes","");
-    L.push("Concept terms were expanded with an AI assistant and/or by mining the literature, then screened by the author. The final search strings above are fully reproducible; if an AI assistant was used to suggest terms, that suggestion step is not deterministic, so this record fixes the exact terms used. Deduplication, screening, and selection were performed outside this tool.");
+    L.push("Concept terms were expanded with an AI assistant and/or by mining the literature, then screened by the author. The full search string for every database searched is listed above and is fully reproducible from the recorded terms; if an AI assistant suggested terms, that suggestion step is not deterministic, so this record fixes the exact terms used. The tool applies no language or controlled-vocabulary filters except the optional PubMed MeSH headings. Deduplication, screening, and selection were performed outside this tool.");
     return L.join("\n");
   }
 
@@ -1389,6 +1451,40 @@
     return {concepts:concepts, narrower:narrower};
   }
 
+  // Deterministic, offline first draft: split a free-text topic into candidate concept blocks so
+  // the description box is not a dead end without an AI assistant. This is a rough scaffold the user
+  // screens and expands; true facet choice and synonym expansion still belong to a person or a model,
+  // which is why this only seeds and never finalises. The same input always yields the same blocks.
+  var SEED_BOUNDARY={of:1,in:1,on:1,"for":1,with:1,to:1,from:1,by:1,via:1,using:1,used:1,during:1,under:1,over:1,between:1,among:1,amongst:1,versus:1,vs:1,and:1,or:1,after:1,before:1,into:1,within:1,across:1,against:1,about:1,regarding:1,toward:1,towards:1,as:1,at:1,through:1,per:1};
+  var SEED_FILLER={mechanism:1,mechanisms:1,effect:1,effects:1,impact:1,impacts:1,role:1,roles:1,study:1,studies:1,analysis:1,analyses:1,review:1,reviews:1,systematic:1,meta:1,assessment:1,assessments:1,evaluation:1,evaluating:1,investigation:1,investigating:1,comparison:1,comparing:1,association:1,associations:1,relationship:1,relationships:1,influence:1,determinant:1,determinants:1,factor:1,factors:1,characterization:1,characterisation:1,overview:1,approach:1,approaches:1,use:1,application:1,applications:1,understanding:1,evidence:1};
+  function seedConceptsFromTopic(topic){
+    var raw=String(topic||"").trim();
+    if(!raw) return {concepts:[], narrower:[]};
+    var work=raw.replace(/[.;:]+\s*$/,"");
+    var tokens=work.split(/[^A-Za-z0-9\-]+/).filter(Boolean);
+    var clauses=[], cur=[];
+    tokens.forEach(function(tok){
+      var low=tok.toLowerCase();
+      if(SEED_BOUNDARY[low]){ if(cur.length){ clauses.push(cur); cur=[]; } return; }
+      cur.push(tok);
+    });
+    if(cur.length) clauses.push(cur);
+    function isStop(w){ return (typeof OA_STOP!=="undefined" && OA_STOP[w]) || w.length<2; }
+    var seen={}, concepts=[];
+    clauses.forEach(function(words){
+      var content=words.filter(function(w){ var l=w.toLowerCase(); return !SEED_FILLER[l] && !isStop(l); });
+      if(!content.length) return;
+      var phrase=content.join(" ").trim();
+      var key=phrase.toLowerCase();
+      if(seen[key]) return; seen[key]=1;
+      // Seed each concept with the phrase only. The strategy linter then prompts the user to add
+      // synonyms and variants, which is the correct PRESS behaviour and keeps the seed low-noise.
+      concepts.push({label:phrase, terms:[phrase]});
+    });
+    if(concepts.length>4) concepts=concepts.slice(0,4);   // keep the leading facets, in order
+    return {concepts:concepts, narrower:[]};
+  }
+
   function loadParsed(obj, fromReply){
     state.concepts=obj.concepts.map(function(c){ return {label:c.label||"Concept", terms:(c.terms||[]).slice(), mesh:Array.isArray(c.mesh)?c.mesh.slice():[]}; });
     state.narrower=obj.narrower||[];
@@ -1407,6 +1503,21 @@
   });
 
   $("copyPrompt").addEventListener("click",function(){ copyText($("promptBox").textContent, $("copyPrompt"), "Copy prompt"); gcEvent("copy/prompt"); });
+
+  // Offline, deterministic first draft straight from the description box, so it is not a dead end
+  // without an AI assistant. Seeds candidate blocks the user then screens and expands.
+  $("draftBlocks").addEventListener("click",function(){
+    var obj=seedConceptsFromTopic($("topic").value);
+    var msg=$("parseMsg");
+    if(obj.concepts.length){
+      loadParsed(obj,false);
+      if(msg){ msg.className="parse-msg ok"; msg.textContent="Drafted "+obj.concepts.length+" candidate block"+(obj.concepts.length>1?"s":"")+" from your description. Screen and expand each: add synonyms, spelling variants, and truncation. For richer terms use step 2 or find terms in literature."; }
+      $("concepts").scrollIntoView({behavior:"smooth",block:"start"});
+      gcEvent("draft/offline");
+    } else if(msg){
+      msg.className="parse-msg bad"; msg.textContent="Could not draft blocks from that text. Add a few descriptive words, or use step 2 or add blocks by hand.";
+    }
+  });
 
   $("parseReply").addEventListener("click",function(){
     var obj=parseReply($("aiReply").value);
@@ -1548,6 +1659,12 @@
     if(dbs.indexOf("WoS")!==-1) q.WoS=buildWoS(bl,y,dts);
     if(dbs.indexOf("PubMed")!==-1) q.PubMed=buildPubMed(bl,y,dts).q;
     if(dbs.indexOf("Scholar")!==-1) q.Scholar=buildScholar(bl,y).q;
+    if(dbs.indexOf("IEEE")!==-1) q.IEEE=buildIEEE(bl);
+    if(dbs.indexOf("ACM")!==-1) q.ACM=buildACM(bl);
+    if(dbs.indexOf("ERIC")!==-1) q.ERIC=buildERIC(bl);
+    if(dbs.indexOf("Ovid")!==-1) q.Ovid=buildOvid(bl);
+    if(dbs.indexOf("EBSCO")!==-1) q.EBSCO=buildEBSCO(bl);
+    if(dbs.indexOf("EngVillage")!==-1) q.EngVillage=buildEngVillage(bl);
     return q;
   }
   function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
@@ -1610,20 +1727,140 @@
       simpleQuery:simpleQuery, scholarTerm:scholarTerm, pubmedTerm:pubmedTerm,
       oaSeed:oaSeed, oaScore:oaScore, oaKeyness:oaKeyness, oaTokens:oaToks, OA_STOP:OA_STOP,
       rcNormalize:rcNormalize, rcTermMatches:rcTermMatches, rcAbstractFromIndex:rcAbstractFromIndex, rcCheck:rcCheck, rcStripTags:rcStripTags,
-      lintStrategy:lintStrategy,
+      lintStrategy:lintStrategy, seedConceptsFromTopic:seedConceptsFromTopic,
       qbEncodeState:qbEncodeState, qbDecodeState:qbDecodeState, buildSearchRecord:buildSearchRecord,
       SCOPUS_DT:SCOPUS_DT, WOS_DT:WOS_DT, PUBMED_PT:PUBMED_PT
     };
   }
 
+  // ── Direct LLM API integration ──────────────────────────────────────────────
+  // Calls OpenAI, Anthropic, Ollama, or any OpenAI-compatible endpoint with the
+  // same prompt used by the copy-paste bridge. The API key is stored in localStorage
+  // on the user's own machine and is never sent anywhere except the chosen provider.
+  (function(){
+    var genBtn=$("aiGenerate");
+    if(!genBtn) return;
+    var cfg={};
+    try{ cfg=JSON.parse(localStorage.getItem("qb_ai_cfg")||"{}"); }catch(e){}
+    function saveCfg(){ try{ localStorage.setItem("qb_ai_cfg",JSON.stringify(cfg)); }catch(e){} }
+
+    var prov=$("aiProvider"), keyIn=$("aiKey"), mdIn=$("aiModel"),
+        epIn=$("aiEndpoint"), epRow=$("aiEndpointRow"), keyRow=$("aiKeyRow"),
+        status=$("aiStatus");
+
+    // Restore persisted settings
+    if(cfg.provider && prov.querySelector("option[value='"+cfg.provider+"']")) prov.value=cfg.provider;
+    if(cfg.key)      keyIn.value=cfg.key;
+    if(cfg.model)    mdIn.value=cfg.model;
+    if(cfg.endpoint) epIn.value=cfg.endpoint;
+
+    var DEFAULT_MODEL={openai:"gpt-4o-mini",anthropic:"claude-haiku-4-5-20251001",ollama:"llama3.1",custom:""};
+
+    function syncUI(){
+      var p=prov.value;
+      // Auto-fill model placeholder and value when switching providers
+      var curModel=mdIn.value;
+      var isDefaultModel=false;
+      for(var k in DEFAULT_MODEL){ if(DEFAULT_MODEL.hasOwnProperty(k)&&DEFAULT_MODEL[k]===curModel){ isDefaultModel=true; break; } }
+      if(!curModel||isDefaultModel){ mdIn.value=DEFAULT_MODEL[p]||""; mdIn.placeholder=DEFAULT_MODEL[p]||""; }
+      epRow.style.display=(p==="ollama"||p==="custom")?"":"none";
+      keyRow.style.display=(p==="ollama")?"none":"";
+      if(p==="ollama"&&!epIn.value) epIn.value="http://localhost:11434/v1/chat/completions";
+    }
+    syncUI();
+
+    prov.addEventListener("change",function(){ cfg.provider=prov.value; syncUI(); saveCfg(); });
+    keyIn.addEventListener("input",function(){ cfg.key=keyIn.value; saveCfg(); });
+    mdIn.addEventListener("input",function(){ cfg.model=mdIn.value; saveCfg(); });
+    epIn.addEventListener("input",function(){ cfg.endpoint=epIn.value; saveCfg(); });
+
+    function setStatus(msg,isErr){
+      status.textContent=msg;
+      status.className=isErr?"err":"";
+    }
+
+    // Calls the LLM via fetch. Returns a Promise<string> containing the assistant reply.
+    // OpenAI / Ollama / Custom: POST to /v1/chat/completions with Bearer auth.
+    // Anthropic: POST to /v1/messages with x-api-key; requires the special CORS header.
+    function callLLM(p, key, model, ep, prompt){
+      var msgs=[{role:"user",content:prompt}];
+      if(p==="anthropic"){
+        var aModel=model||"claude-haiku-4-5-20251001";
+        return fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "x-api-key":key,
+            "anthropic-version":"2023-06-01",
+            "anthropic-dangerous-direct-browser-access":"true"
+          },
+          body:JSON.stringify({model:aModel,max_tokens:1800,messages:msgs})
+        })
+        .then(function(r){
+          if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+" "+t.slice(0,300)); });
+          return r.json();
+        })
+        .then(function(j){
+          var c=j&&j.content&&j.content[0];
+          if(!c) throw new Error("Unexpected response from Anthropic API.");
+          return c.text||"";
+        });
+      }
+      // OpenAI-compatible (openai / ollama / custom)
+      var url=p==="openai"
+        ? "https://api.openai.com/v1/chat/completions"
+        : (ep||"http://localhost:11434/v1/chat/completions");
+      var hdrs={"Content-Type":"application/json"};
+      if(key) hdrs["Authorization"]="Bearer "+key;
+      return fetch(url,{method:"POST",headers:hdrs,
+          body:JSON.stringify({model:model||DEFAULT_MODEL[p]||"gpt-4o-mini",messages:msgs,max_tokens:1800})})
+        .then(function(r){
+          if(!r.ok) return r.text().then(function(t){ throw new Error(r.status+" "+t.slice(0,300)); });
+          return r.json();
+        })
+        .then(function(j){
+          var c=j&&j.choices&&j.choices[0];
+          if(!c) throw new Error("Unexpected response from API.");
+          return (c.message&&c.message.content)||"";
+        });
+    }
+
+    genBtn.addEventListener("click",function(){
+      var p=prov.value, key=keyIn.value.trim(),
+          model=mdIn.value.trim(), ep=epIn.value.trim();
+      var topic=$("topic").value.trim();
+      if(!topic){ setStatus("Enter a research topic in Step 1 first.",true); return; }
+      if(p!=="ollama"&&!key){ setStatus("Paste your API key above.",true); return; }
+      genBtn.disabled=true;
+      var provLabel=prov.options[prov.selectedIndex].text.split(" ")[0];
+      setStatus("Calling "+provLabel+"…",false);
+      callLLM(p,key,model,ep,buildPrompt(topic,state.focus))
+        .then(function(reply){
+          var obj=parseReply(reply);
+          if(!obj.concepts.length){
+            setStatus("No concept blocks in the response — try again or use the copy-paste bridge above.",true);
+            return;
+          }
+          loadParsed(obj,true);
+          setStatus("Done — "+obj.concepts.length+" concept block"+(obj.concepts.length!==1?"s":"")+" loaded.",false);
+          $("concepts").scrollIntoView({behavior:"smooth",block:"start"});
+          gcEvent("ai-direct/"+p);
+        })
+        .catch(function(err){
+          setStatus((err&&err.message)||"API error — check your key, model, and network.",true);
+        })
+        .then(function(){ genBtn.disabled=false; });
+    });
+  })();
+
 })();
 
 // ── Anonymous usage analytics (GoatCounter — no cookies, no PII, GDPR-ok) ──
 // Tracks: page views, query copies by database, recall checks, share-link use.
-// Sign up free at https://www.goatcounter.com and replace YOURSITE below.
+// Anonymous counter at https://mafatlalmkher.goatcounter.com (no cookies, no PII).
 function gcEvent(name){ if(window.goatcounter&&goatcounter.count) goatcounter.count({path:"event/"+name, title:name, event:true}); }
 </script>
-<script data-goatcounter="https://YOURSITE.goatcounter.com/count"
+<script data-goatcounter="https://mafatlalmkher.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
