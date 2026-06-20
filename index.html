@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QueryBee: Boolean query builder for literature search</title>
 <meta name="description" content="Free, no-login browser tool that turns a research topic into correctly fielded, fully parenthesized Boolean search queries for ten literature databases (Scopus, Web of Science, PubMed, Google Scholar, IEEE Xplore, ACM, ERIC, Ovid, EBSCOhost, Engineering Village), with optional MeSH headings for PubMed. Concept-term expansion is kept separate from deterministic, per-engine query assembly.">
-<meta name="author" content="Mafatlal M. Kher">
+<meta name="author" content="Mafatlal M. Kher, Elyashiv Drori">
 <link rel="canonical" href="https://mafatlalmkher-cpu.github.io/querybee/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="QueryBee: Boolean query builder for literature search">
@@ -26,7 +26,10 @@
   "license": "https://opensource.org/licenses/MIT",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "author": { "@type": "Person", "name": "Mafatlal M. Kher", "affiliation": "Department of Chemical Engineering, Ariel University, Israel", "identifier": "https://orcid.org/0000-0001-5600-0040" }
+  "author": [
+    { "@type": "Person", "name": "Mafatlal M. Kher", "affiliation": "Department of Chemical Engineering, Ariel University, Israel", "identifier": "https://orcid.org/0000-0001-5600-0040" },
+    { "@type": "Person", "name": "Elyashiv Drori", "affiliation": "Department of Chemical Engineering, Ariel University, Israel", "identifier": "https://orcid.org/0000-0003-3353-0465" }
+  ]
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -277,7 +280,7 @@
   <header class="top">
     <div class="eyebrow">Literature Search · Methods Tool</div>
     <h1>QueryBee <span class="amp">Boolean query builder for literature search</span></h1>
-    <p class="byline" style="margin:2px 0 6px;font-size:13.5px;color:var(--ink-soft)">A free, open tool by <b style="color:var(--ink)">Mafatlal M. Kher</b>, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID</a> &middot; <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">cite this tool</a></p>
+    <p class="byline" style="margin:2px 0 6px;font-size:13.5px;color:var(--ink-soft)">A free, open tool by <b style="color:var(--ink)">Mafatlal M. Kher</b> (<a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID</a>) and <b style="color:var(--ink)">Elyashiv Drori</b> (<a href="https://orcid.org/0000-0003-3353-0465" target="_blank" rel="noopener">ORCID</a>), Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">cite this tool</a></p>
     <p class="lede">Describe a topic, expand each concept into terms (with any free AI assistant, or by mining the literature), and the tool assembles correctly fielded, fully parenthesized search strings for <b>Scopus</b>, <b>Web of Science</b>, <b>Google Scholar</b>, and <b>PubMed</b> in each engine's own syntax. The syntax assembly is deterministic and field-agnostic. Treat it as a starting scaffold for a search, not a replacement for a librarian's strategy or for screening; the literature term suggestions are most reliable in well-indexed, English-language fields. No account, no key, no cost, and everything runs in your browser.</p>
     <div class="tag-row">
       <span class="db-tag s">Scopus · TITLE-ABS-KEY</span>

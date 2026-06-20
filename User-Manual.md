@@ -1,7 +1,7 @@
 ---
 title: "QueryBee User Manual"
 subtitle: "A browser-based builder for fielded Boolean literature searches"
-author: "Mafatlal M. Kher · Department of Chemical Engineering, Ariel University, Israel · ORCID 0000-0001-5600-0040"
+author: "Mafatlal M. Kher (ORCID 0000-0001-5600-0040) and Elyashiv Drori (ORCID 0000-0003-3353-0465) · Department of Chemical Engineering, Ariel University, Israel"
 date: "Version 1.2.3, June 2026"
 ---
 
@@ -246,4 +246,4 @@ The Google Scholar query is flagged as too long. Scholar has a limit near 256 ch
 
 Cite QueryBee using the repository's `CITATION.cff` file, or:
 
-Kher, M. M. (2026). *QueryBee: a single-file, browser-based fielded Boolean query builder for literature search* (Version 1.2.3) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20733036
+Kher, M. M., & Drori, E. (2026). *QueryBee: a single-file, browser-based fielded Boolean query builder for literature search* (Version 1.3.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20733035
