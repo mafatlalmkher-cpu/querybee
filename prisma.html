@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRISMA 2020 flow diagram — free, in your browser</title>
+<meta name="description" content="Free, no-login browser tool to build a PRISMA 2020 flow diagram (databases and registers version) from your counts and download it as SVG or PNG. A companion to QueryBee. Runs entirely client-side; nothing is uploaded.">
+<style>
+  :root{ color-scheme: light; --ink:#1a1a1a; --soft:#5a5750; --rule:#e5e0d8; --paper:#fcfbf7; --go:#16695c; }
+  *{ box-sizing:border-box }
+  body{ margin:0; font-family:"Hanken Grotesk",-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:var(--ink); background:var(--paper); line-height:1.5 }
+  .wrap{ max-width:900px; margin:0 auto; padding:28px 20px 60px }
+  h1{ font-size:26px; margin:0 0 4px }
+  .sub{ color:var(--soft); margin:0 0 6px }
+  a{ color:var(--go) }
+  .panel{ border:1px solid var(--rule); border-radius:12px; padding:16px; background:#fff; margin-top:16px }
+  .grid{ display:grid; grid-template-columns:repeat(2,minmax(240px,1fr)); gap:10px 18px; font-size:13.5px }
+  label{ display:block }
+  input[type=number]{ width:90px; margin-left:8px }
+  textarea{ width:100%; margin-top:4px; font-family:inherit; font-size:13px }
+  .btns{ margin-top:14px; display:flex; gap:8px; flex-wrap:wrap }
+  button{ font-size:14px; padding:8px 14px; border:1px solid var(--rule); border-radius:9px; background:#fff; cursor:pointer }
+  button.primary{ background:var(--go); color:#fff; border-color:var(--go) }
+  #preview{ margin-top:16px; overflow:auto; border:1px solid var(--rule); border-radius:10px; padding:10px; background:#fff }
+  footer{ margin-top:28px; color:var(--soft); font-size:12.5px; border-top:1px solid var(--rule); padding-top:12px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PRISMA 2020 flow diagram</h1>
+  <p class="sub">Type your counts and download the PRISMA 2020 flow diagram (databases and registers version) as SVG or PNG. Everything runs in your browser; nothing is uploaded, no account, no key.</p>
+  <p class="sub">A free companion to <a href="index.html">QueryBee</a>, the Boolean query builder.</p>
+
+  <div class="panel">
+    <div class="grid">
+      <label>Records from databases (n)<input type="number" id="pr_db" min="0"></label>
+      <label>Records from registers (n)<input type="number" id="pr_reg" min="0"></label>
+      <label>Duplicate records removed (n)<input type="number" id="pr_dup" min="0"></label>
+      <label>Other records removed before screening (n)<input type="number" id="pr_other" min="0"></label>
+      <label>Records screened (n)<input type="number" id="pr_screened" min="0"></label>
+      <label>Records excluded (n)<input type="number" id="pr_excluded" min="0"></label>
+      <label>Reports sought for retrieval (n)<input type="number" id="pr_sought" min="0"></label>
+      <label>Reports not retrieved (n)<input type="number" id="pr_notret" min="0"></label>
+      <label>Reports assessed for eligibility (n)<input type="number" id="pr_assessed" min="0"></label>
+      <label>Reports excluded, total (n)<input type="number" id="pr_repexcl" min="0"></label>
+      <label>Studies included in review (n)<input type="number" id="pr_included" min="0"></label>
+      <label>Reports of included studies (n)<input type="number" id="pr_repincl" min="0"></label>
+    </div>
+    <label style="margin-top:12px;font-size:13.5px">Reasons reports were excluded at full text (one per line, optional)
+      <textarea id="pr_reasons" rows="3" placeholder="Wrong population (n = 12)&#10;Wrong outcome (n = 7)&#10;Not a primary study (n = 5)"></textarea>
+    </label>
+    <div class="btns">
+      <button class="primary" id="pr_generate" type="button">Generate diagram</button>
+      <button id="pr_svg" type="button">Download SVG</button>
+      <button id="pr_png" type="button">Download PNG</button>
+    </div>
+    <div id="preview"></div>
+  </div>
+
+  <footer>
+    Free and open. Builds the PRISMA 2020 flow diagram per Page MJ et al. (2021), BMJ 372:n71. Companion to
+    <a href="index.html">QueryBee</a> by Mafatlal M. Kher. MIT License. Runs entirely in your browser.
+  </footer>
+</div>
+<script>
+(function(){
+  function buildPrismaSVG(c){
+    c=c||{};
+    function n(v){ return (v===undefined||v===null)?'':String(v).trim(); }
+    function e(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    var reasons=(c.reasons||[]).map(function(s){return String(s).trim();}).filter(Boolean);
+    function box(x,y,w,h,lines,fill){
+      var s='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="'+(fill||'#ffffff')+'" stroke="#333333" stroke-width="1"/>';
+      var ty=y+19; for(var i=0;i<lines.length;i++){ s+='<text x="'+(x+10)+'" y="'+ty+'" font-family="Helvetica,Arial,sans-serif" font-size="12.5" fill="#111111">'+e(lines[i])+'</text>'; ty+=17; } return s;
+    }
+    function arrow(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#333333" stroke-width="1.4" marker-end="url(#ah)"/>'; }
+    function phase(x,y,t){ return '<text x="'+x+'" y="'+y+'" font-family="Helvetica,Arial,sans-serif" font-size="13" font-weight="bold" fill="#444444">'+e(t)+'</text>'; }
+    var MX=40,MW=320,SX=460,SW=320,fM='#eef3f8',fS='#f6f6f6';
+    var b8=['Reports excluded (n = '+n(c.repexcl)+'):'].concat(reasons.map(function(r){return '   '+r;}));
+    var b8h=Math.max(40,12+b8.length*17), H=470+Math.max(0,b8h-40), p=[];
+    p.push('<svg xmlns="http://www.w3.org/2000/svg" width="820" height="'+H+'" viewBox="0 0 820 '+H+'">');
+    p.push('<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#333333"/></marker></defs>');
+    p.push('<rect x="0" y="0" width="820" height="'+H+'" fill="#ffffff"/>');
+    p.push(phase(MX,26,'Identification'));
+    p.push(box(MX,36,MW,58,['Records identified from:','   Databases (n = '+n(c.db)+')','   Registers (n = '+n(c.reg)+')'],fM));
+    p.push(box(SX,36,SW,58,['Records removed before screening:','   Duplicates removed (n = '+n(c.dup)+')','   Other reasons (n = '+n(c.other)+')'],fS));
+    p.push(arrow(MX+MW,65,SX,65));
+    p.push(phase(MX,126,'Screening'));
+    p.push(box(MX,136,MW,40,['Records screened (n = '+n(c.screened)+')'],fM));
+    p.push(box(SX,136,SW,40,['Records excluded (n = '+n(c.excluded)+')'],fS));
+    p.push(arrow(MX+MW/2,94,MX+MW/2,136));
+    p.push(arrow(MX+MW,156,SX,156));
+    p.push(box(MX,206,MW,40,['Reports sought for retrieval (n = '+n(c.sought)+')'],fM));
+    p.push(box(SX,206,SW,40,['Reports not retrieved (n = '+n(c.notret)+')'],fS));
+    p.push(arrow(MX+MW/2,176,MX+MW/2,206));
+    p.push(arrow(MX+MW,226,SX,226));
+    p.push(box(MX,276,MW,40,['Reports assessed for eligibility (n = '+n(c.assessed)+')'],fM));
+    p.push(box(SX,276,SW,b8h,b8,fS));
+    p.push(arrow(MX+MW/2,246,MX+MW/2,276));
+    p.push(arrow(MX+MW,296,SX,296));
+    p.push(phase(MX,366,'Included'));
+    p.push(box(MX,376,MW,58,['Studies included in review (n = '+n(c.included)+')','Reports of included studies (n = '+n(c.repincl)+')'],fM));
+    p.push(arrow(MX+MW/2,316,MX+MW/2,376));
+    p.push('</svg>'); return p.join('');
+  }
+  function $(id){ return document.getElementById(id); }
+  function g(id){ var el=$(id); return el?el.value:''; }
+  function counts(){ return { db:g("pr_db"),reg:g("pr_reg"),dup:g("pr_dup"),other:g("pr_other"),screened:g("pr_screened"),excluded:g("pr_excluded"),sought:g("pr_sought"),notret:g("pr_notret"),assessed:g("pr_assessed"),repexcl:g("pr_repexcl"),included:g("pr_included"),repincl:g("pr_repincl"),reasons:String(g("pr_reasons")||"").split(/\r?\n/) }; }
+  var lastSVG="";
+  function render(){ lastSVG=buildPrismaSVG(counts()); $("preview").innerHTML=lastSVG; }
+  function dl(name,blob){ var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },0); }
+  $("pr_generate").addEventListener("click", render);
+  $("pr_svg").addEventListener("click", function(){ if(!lastSVG) render(); dl("prisma-flow.svg", new Blob([lastSVG],{type:"image/svg+xml;charset=utf-8"})); });
+  $("pr_png").addEventListener("click", function(){ if(!lastSVG) render(); var img=new Image(); var url=URL.createObjectURL(new Blob([lastSVG],{type:"image/svg+xml;charset=utf-8"})); img.onload=function(){ var sc=2,cv=document.createElement("canvas"); cv.width=img.width*sc; cv.height=img.height*sc; var x=cv.getContext("2d"); x.scale(sc,sc); x.drawImage(img,0,0); URL.revokeObjectURL(url); cv.toBlob(function(b){ dl("prisma-flow.png",b); }); }; img.onerror=function(){ URL.revokeObjectURL(url); }; img.src=url; });
+  render();
+})();
+</script>
+</body>
+</html>
