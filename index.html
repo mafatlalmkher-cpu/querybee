@@ -241,6 +241,9 @@
 
   footer.foot{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-faint);line-height:1.6}
   footer.foot b{color:var(--ink-soft);font-weight:600}
+  footer.foot .companions{font-size:14.5px;color:var(--ink-soft);font-weight:500;background:#fff;border:1px solid var(--rule);border-radius:10px;padding:11px 15px;margin:2px 0 16px;line-height:1.6}
+  footer.foot .companions b{color:var(--ink-soft)}
+  footer.foot .companions a{font-weight:700;text-decoration:underline}
   @media(max-width:560px){
     .wrap{padding:0 16px 64px}
     header.top{padding:30px 0 20px;margin-bottom:24px}
@@ -349,6 +352,34 @@
             <button class="toggle db" data-db="EngVillage">Engineering Village</button>
           </div>
         </div>
+        <style>
+          .refine summary{cursor:pointer;font-size:13px;color:var(--ink-soft);padding:2px 0}
+          .refine .refine-body{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;max-width:660px}
+          .refine label.rf{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-soft)}
+          .refine label.rf.full{grid-column:1 / -1}
+          .refine label.rf select,.refine label.rf input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff;color:var(--ink)}
+          .refine .rf-note{grid-column:1 / -1;margin:0;font-size:11.5px;color:var(--ink-faint);line-height:1.45}
+        </style>
+        <div class="fgroup" role="group" aria-labelledby="fg-refine" style="grid-column:1 / -1">
+          <span class="flabel" id="fg-refine">Refine Scopus &amp; Web of Science <span class="opt-pill">optional</span></span>
+          <details class="refine">
+            <summary>Field scope and precision filters</summary>
+            <div class="refine-body">
+              <label class="rf full">Search field for your concept terms
+                <select id="rfField">
+                  <option value="topic" selected>Topic &mdash; title, abstract, keywords (TITLE-ABS-KEY / TS=)</option>
+                  <option value="title">Title only (TITLE / TI=)</option>
+                  <option value="abstract">Abstract (ABS / AB=)</option>
+                  <option value="authkey">Author keywords (AUTHKEY / AK=)</option>
+                </select>
+              </label>
+              <p class="rf-note">Topic gives the best recall and is recommended for systematic searches; Title or Abstract only retrieves fewer records.</p>
+              <label class="rf">Author<input type="text" id="rfAuthor" placeholder="e.g. Maree, Bester"></label>
+              <label class="rf">Source / journal title<input type="text" id="rfSource" placeholder="e.g. Plant Disease"></label>
+              <p class="rf-note">Filters are added with AND to the Scopus and Web of Science queries only, each mapped to that database's field code (Scopus AUTH, SRCTITLE; WoS AU=, SO=). Separate alternatives with a comma to OR them within a field. For a systematic review leave these blank; author or journal limits reduce recall and are best reserved for targeted or supplementary searches.</p>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   </section>
@@ -414,10 +445,19 @@
       </div>
       <div class="qcard g" data-db="Scholar">
         <div class="qbar"></div>
-        <div class="qhead"><div class="qname"><span class="db">Google Scholar</span><span class="mode">full-text search</span></div><button class="copy" data-target="scholarStr">Copy</button></div>
-        <pre class="qstr" id="scholarStr"></pre>
-        <div class="qmeta" id="scholarMeta"></div>
+        <div class="qhead"><div class="qname"><span class="db">Google Scholar</span><span class="mode">supplementary search · screen first 100 to 200</span></div><button class="copy" data-target="scholarCompactStr">Copy</button></div>
+        <pre class="qstr" id="scholarCompactStr"></pre>
+        <div class="qmeta" id="scholarCompactMeta"></div>
+        <details class="scholar-full">
+          <summary>Full Boolean version (Google keeps only the first ~256 characters)</summary>
+          <pre class="qstr" id="scholarStr" style="margin-top:6px"></pre>
+          <div class="qmeta" id="scholarMeta"></div>
+          <div style="margin-top:6px"><button class="copy" data-target="scholarStr">Copy full version</button></div>
+        </details>
+        <div class="qnote-sm" id="scholarGuide">Google Scholar reads only the first ~256 characters and silently drops the rest, so run the compact query above rather than the full Boolean. It is a supplementary source, not your systematic search of record: rely on Scopus, Web of Science and PubMed for recall, and use Scholar to catch what they miss. Run two or three focused versions, swapping one core synonym each time.</div>
+        <div class="qnote-sm" id="scholarPrisma"><b>PRISMA-S:</b> record the exact terms you typed, the date, and how many results you screened (sort by relevance and screen roughly the first 100 to 200), then count those records in the flow diagram under records from other sources.</div>
         <div class="qfoot"><a id="scholarLink" href="https://scholar.google.com" target="_blank" rel="noopener">Search Google Scholar now ↗</a></div>
+        <style>.scholar-full{margin:8px 0}.scholar-full>summary{cursor:pointer;font-size:12.5px;color:var(--ink-soft)}.qnote-sm{font-size:12px;color:var(--ink-soft);line-height:1.55;margin-top:8px}.qnote-sm b{color:var(--ink)}</style>
       </div>
       <div class="qcard p" data-db="PubMed">
         <div class="qbar"></div>
@@ -475,6 +515,18 @@
       <h3>Strategy review · PRESS / PRISMA-S</h3>
       <p id="lintEmpty" style="margin:0;font-size:13.5px;color:var(--ink-soft)">Add concept blocks above and this panel flags gaps against peer-review-of-search criteria as you build.</p>
       <div id="lintResults" aria-live="polite"></div>
+    </div>
+
+    <div class="qnote" id="rescuePanel">
+      <h3>Too few or zero results? How to broaden</h3>
+      <p id="rescueEmpty" style="margin:0;font-size:13.5px;color:var(--ink-soft)">Build your concept blocks above. If a search returns very few or no records, this panel lists the most effective ways to broaden it, in order of impact.</p>
+      <ol id="rescueList" style="margin:6px 0 0;padding-left:20px"></ol>
+      <div style="margin-top:10px">
+        <button class="mini" id="estimateBtn" type="button">Refresh estimate (free, OpenAlex)</button>
+        <span id="estimateOut" class="est-note"></span>
+        <div class="est-note" style="margin-left:0;margin-top:4px">Updates automatically as you edit your concepts and years. A free order-of-magnitude estimate from the open OpenAlex corpus, not the Scopus or Web of Science count.</div>
+      </div>
+      <style>.est-note{font-size:12.5px;color:var(--ink-soft);margin-left:8px}.est-low{color:var(--danger);font-weight:600}.est-ok{color:var(--scholar-deep)}</style>
     </div>
 
     <div class="morewrap">
@@ -540,8 +592,9 @@
   </section>
 
   <footer class="foot">
+    <p class="companions"><b>Companion tools (free, in your browser):</b> <a href="https://mafatlalmkher-cpu.github.io/research-toolkit/dedupe.html" target="_blank" rel="noopener">citation de-duplicator</a> &middot; <a href="https://mafatlalmkher-cpu.github.io/research-toolkit/screen.html" target="_blank" rel="noopener">abstract screening</a> &middot; <a href="https://mafatlalmkher-cpu.github.io/research-toolkit/prisma-flow.html" target="_blank" rel="noopener">PRISMA 2020 flow diagram</a></p>
     <p><b>How it works.</b> The query syntax for each database is assembled by the tool itself, so the fielded structure is consistent and editable. The AI step only expands a topic into concept terms, and it runs in whatever chatbot you already use, so the tool needs no API key and costs nothing. Multi-word terms are quoted as phrases, and a trailing asterisk truncates word stems in Scopus, Web of Science, and PubMed. Google Scholar does not support stem truncation, so the asterisk is removed from the Scholar query automatically.</p>
-    <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external request is the optional find-terms helper, which mines candidate terms from the OpenAlex scholarly database (free, no account, no key) and falls back to a public dictionary or fails quietly when offline, so the core query builder always works.</p>
+    <p><b>Hosting it for a class.</b> This is a single static file. Put it on any web host or open it locally and it works for everyone, because it calls no paid service. The only external requests go to OpenAlex (free, no account, no key): the optional find-terms helper, which mines candidate terms and falls back to a public dictionary, and the results estimate, which refreshes as you type. Both fail quietly when offline, so the core query builder always works.</p>
     <p class="cred"><b>QueryBee</b> v1.2.3 &middot; developed by Mafatlal M. Kher, Department of Chemical Engineering, Ariel University, Israel &middot; <a href="https://orcid.org/0000-0001-5600-0040" target="_blank" rel="noopener">ORCID 0000-0001-5600-0040</a> &middot; cite via DOI <a href="https://doi.org/10.5281/zenodo.20733036" target="_blank" rel="noopener">10.5281/zenodo.20733036</a> &middot; <a href="https://github.com/mafatlalmkher-cpu/querybee" target="_blank" rel="noopener">source on GitHub</a> &middot; MIT License</p>
   </footer>
 
@@ -599,6 +652,19 @@
   function selectedDocTypes(){ var o=[],n=document.querySelectorAll("#doctypes .toggle.on"); for(var i=0;i<n.length;i++)o.push(n[i].getAttribute("data-dt")); return o; }
   function selectedDBs(){ var o=[],n=document.querySelectorAll("#dbtoggles .toggle.on"); for(var i=0;i<n.length;i++)o.push(n[i].getAttribute("data-db")); return o; }
   function yearVals(){ var f=parseInt($("yearFrom").value,10),t=parseInt($("yearTo").value,10); if(isNaN(f))f=null; if(isNaN(t))t=null; return {from:f,to:t}; }
+  // Read the optional Refine controls (Scopus & Web of Science). field selects the search scope;
+  // each non-empty filter is paired with its Scopus and WoS field code.
+  function refineOpts(){
+    function v(id){ var e=$(id); return e?String(e.value||"").trim():""; }
+    var fEl=$("rfField"), field=fEl?fEl.value:"topic";
+    var defs=[
+      {scopus:"AUTH",     wos:"AU", val:v("rfAuthor")},
+      {scopus:"SRCTITLE", wos:"SO", val:v("rfSource")}
+    ];
+    return { field:field, filters:defs.filter(function(f){ return f.val; }) };
+  }
+  function gatherRefine(){ function v(id){ var e=$(id); return e?String(e.value||"").trim():""; } var fEl=$("rfField"); return { field:fEl?fEl.value:"topic", author:v("rfAuthor"), source:v("rfSource") }; }
+  function applyRefine(r){ if(!r) return; if($("rfField")&&r.field) $("rfField").value=r.field; var m={rfAuthor:r.author,rfSource:r.source}; for(var k in m){ if($(k)&&m[k]!=null) $(k).value=m[k]; } }
 
   function blocksFromConcepts(concepts){
     return (concepts||[]).map(function(c){ return (c.terms||[]).map(normTerm).filter(Boolean); }).filter(function(ts){ return ts.length>0; });
@@ -617,25 +683,39 @@
   // The four builders are pure: each takes prepared blocks (arrays of normalized terms), a
   // {from,to} year object, and an array of document-type names, and returns a string. This
   // keeps query assembly deterministic and unit-testable independent of the DOM.
-  function buildScopus(blocks, y, dts){
+  // Optional refine settings map a chosen search scope to the correct field code in each
+  // database (verified against Elsevier and Web of Science documentation), with Topic as the
+  // recall-maximising default. Filters are AND-appended, each in its database's own field code.
+  var QB_SCOPUS_FIELD = { topic:"TITLE-ABS-KEY", title:"TITLE", abstract:"ABS", authkey:"AUTHKEY" };
+  var QB_WOS_FIELD    = { topic:"TS", title:"TI", abstract:"AB", authkey:"AK" };
+  // A filter value may carry comma-separated alternatives, OR-ed inside the field; multi-word
+  // values are phrase-quoted so they read as literals and cannot break the Boolean structure.
+  function rfVal(v){
+    return String(v||"").split(/\s*,\s*/).map(function(x){ x=x.trim(); if(!x) return ""; return /\s/.test(x) ? '"'+x.replace(/"/g,"")+'"' : x; }).filter(Boolean).join(" OR ");
+  }
+  function buildScopus(blocks, y, dts, ref){
     if(!blocks.length) return "";
-    var q=blocks.map(function(ts){ return "TITLE-ABS-KEY("+ts.join(" OR ")+")"; }).join(" AND ");
+    var sf=(ref&&QB_SCOPUS_FIELD[ref.field])||"TITLE-ABS-KEY";
+    var q=blocks.map(function(ts){ return sf+"("+ts.join(" OR ")+")"; }).join(" AND ");
     if(y){
       if(y.from!=null) q+=" AND PUBYEAR > "+(y.from-1);
       if(y.to!=null)   q+=" AND PUBYEAR < "+(y.to+1);
     }
     var sdt=(dts||[]).map(function(x){return SCOPUS_DT[x];}).filter(Boolean); if(sdt.length){ q+=" AND DOCTYPE("+sdt.join(" OR ")+")"; }
+    if(ref&&ref.filters) ref.filters.forEach(function(f){ var v=rfVal(f.val); if(v) q+=" AND "+f.scopus+"("+v+")"; });
     return q;
   }
-  function buildWoS(blocks, y, dts){
+  function buildWoS(blocks, y, dts, ref){
     if(!blocks.length) return "";
-    var q=blocks.map(function(ts){ return "TS=("+ts.join(" OR ")+")"; }).join(" AND ");
+    var wf=(ref&&QB_WOS_FIELD[ref.field])||"TS";
+    var q=blocks.map(function(ts){ return wf+"=("+ts.join(" OR ")+")"; }).join(" AND ");
     if(y){
       if(y.from!=null&&y.to!=null) q+=" AND PY=("+y.from+"-"+y.to+")";
       else if(y.from!=null)        q+=" AND PY=("+y.from+"-2100)";
       else if(y.to!=null)          q+=" AND PY=(1800-"+y.to+")";
     }
     var wdt=(dts||[]).map(function(x){return WOS_DT[x];}).filter(Boolean); if(wdt.length){ q+=" AND DT=("+wdt.join(" OR ")+")"; }
+    if(ref&&ref.filters) ref.filters.forEach(function(f){ var v=rfVal(f.val); if(v) q+=" AND "+f.wos+"=("+v+")"; });
     return q;
   }
   // Google Scholar's asterisk is a whole-word placeholder, not character truncation, so a
@@ -660,6 +740,20 @@
       if(y.to!=null)   params+="&as_yhi="+y.to;
     }
     return { q:q, url:"https://scholar.google.com/scholar?"+params };
+  }
+  // Scholar-specific strategy. Google Scholar reads only ~256 characters and silently truncates the
+  // rest, has no real fielded Boolean, and inserts AND automatically. The compact query keeps one
+  // core term per concept (the first listed), space-joined so Scholar ANDs them, wildcards and field
+  // tags already removed by scholarTerm. Years ride in the URL params, not the 256-char query. Run
+  // it as a supplementary search, swapping a synonym across two or three focused runs.
+  function buildScholarCompact(blocks, y){
+    if(!blocks.length) return {q:"",url:"https://scholar.google.com",n:0};
+    var core=[];
+    blocks.forEach(function(ts){ for(var i=0;i<ts.length;i++){ var s=scholarTerm(ts[i]); if(s){ core.push(s); break; } } });
+    var q=core.join(" ");
+    var params="q="+encodeURIComponent(q);
+    if(y){ if(y.from!=null) params+="&as_ylo="+y.from; if(y.to!=null) params+="&as_yhi="+y.to; }
+    return { q:q, url:"https://scholar.google.com/scholar?"+params, n:q.length };
   }
   var PUBMED_PT = { "Article":'"Journal Article"', "Review":"Review", "Editorial":"Editorial", "Letter":"Letter", "Erratum":'"Published Erratum"' };
   // PubMed cannot truncate inside a quoted phrase, so the asterisk is removed when a term
@@ -763,6 +857,7 @@
     var nonEmpty = (concepts||[]).filter(function(c){ return (c.terms||[]).filter(Boolean).length>0; });
     if(nonEmpty.length===0){ add("error","No concept blocks with terms yet. Add at least one concept."); return out; }
     if(nonEmpty.length<2){ add("warning","A focused search usually combines at least two concept blocks with AND; you have "+nonEmpty.length+". A single concept is often too broad."); }
+    if(nonEmpty.length>=4){ add("warning","Zero-recall risk: "+nonEmpty.length+" concepts are combined with AND, so a paper must mention all "+nonEmpty.length+" in its title, abstract, or keywords to be found. This often returns very few or no results. Merge closely related concepts into one block with OR (for example, combine elimination methods such as thermotherapy and meristem culture), or move the most specific concept (such as a detection method like RT-qPCR) to your screening criteria instead of the search string."); }
     var US_UK=[["tumor","tumour"],["behavior","behaviour"],["color","colour"],["fiber","fibre"],["aging","ageing"],["estrogen","oestrogen"],["leukemia","leukaemia"],["pediatric","paediatric"],["signaling","signalling"],["modeling","modelling"],["randomized","randomised"]];
     (concepts||[]).forEach(function(c){
       var label=c.label||"concept";
@@ -788,6 +883,134 @@
     var y=opts.years||{};
     if(y.from!=null&&y.to!=null&&(y.to-y.from)>=0&&(y.to-y.from)<5) add("info","Narrow publication-year limit ("+y.from+"-"+y.to+"). Confirm the restriction is intended and record it (PRISMA-S).");
     return out;
+  }
+
+  // ---- Too-few / zero-recall rescue ----
+  // QueryBee never sees a live result count (it only builds the string), so this gives proactive,
+  // structure-derived advice for broadening a search that returns few or no records, ordered by
+  // expected impact. The method/assay pattern is recognised across molecular biology, analytical
+  // chemistry, and microscopy, so the "reserve the technique for screening" advice is subject-aware
+  // without hard-coding any one field. Pure and testable; the UI renders it live.
+  var QB_METHOD_RE=/\b(pcr|qpcr|rt-?pcr|rt-?qpcr|qrt-?pcr|real-?time pcr|ddpcr|elisa|immunoassay|immunoblot|western blot|northern blot|southern blot|sequenc|ngs|rna-?seq|sanger|microarray|hybridi|electrophoresis|chromatograph|hplc|gc-?ms|lc-?ms|mass spectrom|spectroscop|spectrometr|microscop|facs|flow cytometr|crispr|genotyp|amplificat|immunohisto|assay)/i;
+  function recallRescue(concepts, opts){
+    opts=opts||{};
+    var out=[]; function add(step, detail){ out.push({step:step, detail:detail}); }
+    var nonEmpty=(concepts||[]).filter(function(c){ return (c.terms||[]).filter(Boolean).length>0; });
+    if(nonEmpty.length===0) return out;
+    function stat(c){
+      var terms=(c.terms||[]).map(function(t){return String(t).trim();}).filter(Boolean);
+      var phrases=terms.filter(function(t){ return /\s/.test(t.replace(/^"|"$/g,"")); }).length;
+      var methodish=terms.some(function(t){ return QB_METHOD_RE.test(t.replace(/"/g,"")); });
+      return { label:c.label||"concept", n:terms.length, allPhrase:terms.length>0&&phrases===terms.length, methodish:methodish };
+    }
+    var S=nonEmpty.map(stat);
+    if(nonEmpty.length>=4){
+      add("Use fewer AND concepts ("+nonEmpty.length+" now).",
+          "A paper must contain all "+nonEmpty.length+" concepts to be retrieved, which often returns nothing. Most searches need only two or three. Merge closely related concepts with OR, or remove the least essential.");
+    }
+    var methodCs=S.filter(function(s){ return s.methodish; });
+    if(methodCs.length){
+      add("Move method or detection concepts to screening: "+methodCs.map(function(s){return "'"+s.label+"'";}).join(", ")+".",
+          "Techniques such as PCR, qPCR, sequencing, ELISA, or chromatography are used but rarely named in a title, abstract, or keywords, so requiring one as a concept drops relevant papers. Remove it from the search and check the method while screening full texts.");
+    }
+    if(nonEmpty.length>=2){
+      var narrow=S.slice().sort(function(a,b){ return a.n-b.n || ((b.allPhrase?1:0)-(a.allPhrase?1:0)); })[0];
+      add("Relax the narrowest concept first: '"+narrow.label+"' ("+narrow.n+" term"+(narrow.n===1?"":"s")+").",
+          "It is the easiest place to lose records. Temporarily remove it to see how many the rest of the search returns, then add synonyms before putting it back.");
+    }
+    var singles=S.filter(function(s){ return s.n===1; });
+    if(singles.length){
+      add("Add synonyms to single-term concept"+(singles.length>1?"s":"")+": "+singles.map(function(s){return "'"+s.label+"'";}).join(", ")+".",
+          "One term per concept is the most common cause of low recall. Add lexical variants, British and American spellings, abbreviations with their expansions, and older or obsolete names.");
+    }
+    var phraseOnly=S.filter(function(s){ return s.allPhrase; });
+    if(phraseOnly.length){
+      add("Loosen exact phrases in: "+phraseOnly.map(function(s){return "'"+s.label+"'";}).join(", ")+".",
+          "Multi-word phrases match only that exact wording. Add a truncated single-word stem (for example meristem* or therap*) to catch variant phrasings.");
+    }
+    var field=opts.field||(opts.refine&&opts.refine.field)||"topic";
+    if(field==="title"||field==="abstract"||field==="authkey"){
+      var fl={title:"Title only",abstract:"Abstract",authkey:"Author keywords"}[field];
+      add("Switch the Scopus and Web of Science search field back to Topic.",
+          "It is set to "+fl+", which searches a smaller part of each record. Topic (TITLE-ABS-KEY / TS=) gives the most recall.");
+    }
+    var y2=opts.years||{};
+    if(y2.from!=null&&y2.to!=null&&(y2.to-y2.from)>=0&&(y2.to-y2.from)<10){
+      add("Widen the publication-year range ("+y2.from+" to "+y2.to+" now).",
+          "A short window can exclude key earlier or later work. Widen it unless the limit is part of your protocol.");
+    }
+    if(opts.docTypes&&opts.docTypes.length&&opts.docTypes.length<=2){
+      add("Allow more document types.",
+          "Restricting to one or two types can drop relevant conference papers, book chapters, or notes. Loosen unless your protocol requires the limit.");
+    }
+    add("If it is still empty, broaden in this order.",
+        "Remove the most specific concept; merge related concepts with OR; widen the years; add synonyms and truncated stems; switch any Title-only field back to Topic; and run the search in a second database, since coverage differs.");
+    return out;
+  }
+
+  // ---- Free live recall estimate (OpenAlex) ----
+  // QueryBee cannot see a subscription database's count, but it can ask the free OpenAlex corpus
+  // (title and abstract, no key) how many works match the same concept structure: each block maps
+  // to one title_and_abstract.search clause (OR within), clauses are ANDed. The number is an
+  // order-of-magnitude sanity check, not the Scopus or Web of Science count, and is most useful for
+  // catching a query that returns essentially nothing. Truncation asterisks are dropped (OpenAlex
+  // has no stem operator). oaEstSearchVal and oaEstimateFilter are pure and testable.
+  function oaEstSearchVal(terms){
+    return (terms||[]).map(function(t){
+      var phrase = t.charAt(0)==='"' && t.charAt(t.length-1)==='"';
+      var inner=(phrase?t.slice(1,-1):t).replace(/\*/g,"").trim();
+      if(!inner) return "";
+      return phrase ? '"'+inner+'"' : inner;
+    }).filter(Boolean).join(" OR ");
+  }
+  function oaEstimateFilter(blocks, years){
+    var parts=[];
+    (blocks||[]).forEach(function(ts){ var v=oaEstSearchVal(ts); if(v) parts.push("title_and_abstract.search:"+encodeURIComponent(v)); });
+    if(!parts.length) return "";
+    if(years){ if(years.from!=null) parts.push("from_publication_date:"+years.from+"-01-01"); if(years.to!=null) parts.push("to_publication_date:"+years.to+"-12-31"); }
+    return parts.join(",");
+  }
+  // Shared rendering for the estimate line. Wording is deliberately "estimate": the free OpenAlex
+  // corpus differs in coverage and in Boolean/truncation handling from Scopus and WoS, so this is an
+  // order-of-magnitude figure, not the subscription database's yield.
+  function renderEstimateNote(out,n){
+    var tail = n===0 ? "Zero here strongly suggests the query is too narrow. Use the steps above to broaden."
+             : (n<10 ? "Very few. Consider broadening with the steps above before you run it."
+             : "A workable set. Scopus and Web of Science cover more, so expect a different, usually larger, count.");
+    out.className = n<10 ? "est-note est-low" : "est-note est-ok";
+    out.innerHTML = "Estimated <b>~"+n.toLocaleString()+"</b> records in the free OpenAlex title and abstract corpus. Rough estimate, not the Scopus or Web of Science count. "+tail;
+  }
+  function oaCountURL(filter){ return OPENALEX+"?per-page=1&select=id&filter="+filter+(OA_MAILTO?("&mailto="+encodeURIComponent(OA_MAILTO)):""); }
+  function currentEstimateFilter(){ var bl=blocksFor(); return bl.length ? oaEstimateFilter(bl, yearVals()) : ""; }
+  // Cache by filter string, and a sequence token so only the most recent request paints. Both the
+  // live (debounced) path and the manual button share runEstimate.
+  var _estTimer=null, _estSeq=0, _estCache={};
+  function runEstimate(filter, isLive){
+    var out=$("estimateOut"); if(!out) return;
+    var seq=++_estSeq;
+    if(_estCache[filter]!=null){ renderEstimateNote(out,_estCache[filter]); return; }
+    out.className="est-note"; out.textContent="Estimating from OpenAlex…";
+    fetch(oaCountURL(filter)).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.json(); })
+      .then(function(j){ if(seq!==_estSeq) return; var n=(j&&j.meta&&j.meta.count)||0; _estCache[filter]=n; renderEstimateNote(out,n); gcEvent(isLive?"estimate/openalex-live":"estimate/openalex"); })
+      .catch(function(){ if(seq!==_estSeq) return; out.className="est-note"; out.textContent=isLive?"Estimate unavailable (offline).":"Could not reach OpenAlex (offline or blocked). The broadening steps above still apply."; });
+  }
+  // Debounced auto-estimate: rescheduled on every edit via renderQueries; fires ~0.7s after typing
+  // stops. Empty query (no terms) clears the line and never hits the network.
+  function scheduleLiveEstimate(){
+    var out=$("estimateOut"); if(!out) return;
+    if(_estTimer){ clearTimeout(_estTimer); _estTimer=null; }
+    var filter=currentEstimateFilter();
+    if(!filter){ _estSeq++; out.className="est-note"; out.textContent=""; return; }
+    if(_estCache[filter]!=null){ _estSeq++; renderEstimateNote(out,_estCache[filter]); return; }
+    _estTimer=setTimeout(function(){ _estTimer=null; runEstimate(filter,true); }, 700);
+  }
+  // Manual button: same logic, immediate, skips the debounce.
+  function estimateRecall(){
+    var out=$("estimateOut"); if(!out) return;
+    if(_estTimer){ clearTimeout(_estTimer); _estTimer=null; }
+    var filter=currentEstimateFilter();
+    if(!filter){ out.className="est-note"; out.textContent="Add at least one concept block with a term first."; return; }
+    runEstimate(filter,false);
   }
 
   // ---- Save / share / export ----
@@ -824,6 +1047,7 @@
     var yr=(st.yearFrom||st.yearTo)?("from "+(st.yearFrom||"earliest")+" to "+(st.yearTo||"latest")):"no limit";
     L.push(qbField("Publication years", yr));
     L.push(qbField("Document types", (st.docTypes||[]).join(", ")||"any"));
+    if(st.refine){ var _rf=st.refine, _fm={topic:"Topic (title, abstract, keywords)",title:"Title only",abstract:"Abstract",authkey:"Author keywords"}; L.push(qbField("Scopus/WoS search field", _fm[_rf.field]||"Topic (title, abstract, keywords)")); var _fl=[]; if(_rf.author)_fl.push("author: "+_rf.author); if(_rf.affil)_fl.push("affiliation: "+_rf.affil); if(_rf.country)_fl.push("country: "+_rf.country); if(_rf.source)_fl.push("source: "+_rf.source); if(_rf.fund)_fl.push("funding sponsor: "+_rf.fund); if(_fl.length) L.push(qbField("Scopus/WoS filters", _fl.join("; "))); }
     L.push(qbField("Databases searched", (st.dbs||[]).join(", ")||"(none selected)"));
     L.push(qbField("Search peer review", "Automated PRESS / PRISMA-S strategy review (QueryBee). Independent human peer review recommended."));
     L.push("","## Concepts and terms","");
@@ -839,8 +1063,8 @@
 
   function hi(str,kind){
     var s=esc(str);
-    if(kind==="s") s=s.replace(/\b(TITLE-ABS-KEY|PUBYEAR|DOCTYPE)\b/g,'<span class="fld">$1</span>');
-    else if(kind==="w") s=s.replace(/\b(TS|PY|DT)=/g,'<span class="fld">$1=</span>');
+    if(kind==="s") s=s.replace(/\b(TITLE-ABS-KEY|TITLE|ABS|AUTHKEY|AUTH|SRCTITLE|PUBYEAR|DOCTYPE)\b/g,'<span class="fld">$1</span>');
+    else if(kind==="w") s=s.replace(/\b(TS|TI|AB|AK|AU|SO|PY|DT)=/g,'<span class="fld">$1=</span>');
     else if(kind==="p") s=s.replace(/(\[(?:tiab|dp|pt|MeSH)\])/g,'<span class="fld">$1</span>');
     s=s.replace(/ (AND NOT|AND|OR) /g,' <span class="op">$1</span> ');
     return s;
@@ -887,26 +1111,27 @@
   }
 
   function renderQueries(){
-    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes();
-    var sc=buildScopus(bl,y,dts), wo=buildWoS(bl,y,dts), gs=buildScholar(bl,y), pm=buildPubMed(bl,y,dts,pubmedMeshFor());
+    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes(), ref=refineOpts();
+    var sc=buildScopus(bl,y,dts,ref), wo=buildWoS(bl,y,dts,ref), gs=buildScholar(bl,y), gsc=buildScholarCompact(bl,y), pm=buildPubMed(bl,y,dts,pubmedMeshFor());
     var emptyMsg='<span style="color:var(--ink-faint)">Add at least one concept with a term.</span>';
     $("scopusStr").innerHTML = sc?hi(sc,"s"):emptyMsg; $("scopusStr").setAttribute("data-raw",sc);
     $("wosStr").innerHTML    = wo?hi(wo,"w"):emptyMsg; $("wosStr").setAttribute("data-raw",wo);
     $("scholarStr").innerHTML= gs.q?hi(gs.q,"g"):emptyMsg; $("scholarStr").setAttribute("data-raw",gs.q);
+    $("scholarCompactStr").innerHTML= gsc.q?hi(gsc.q,"g"):emptyMsg; $("scholarCompactStr").setAttribute("data-raw",gsc.q);
     $("pubmedStr").innerHTML = pm.q?hi(pm.q,"p"):emptyMsg; $("pubmedStr").setAttribute("data-raw",pm.q);
     var bnew=[["ieeeStr",buildIEEE(bl)],["acmStr",buildACM(bl)],["ericStr",buildERIC(bl)],["ovidStr",buildOvid(bl)],["ebscoStr",buildEBSCO(bl)],["evStr",buildEngVillage(bl)]];
     bnew.forEach(function(p){ var el=$(p[0]); if(!el)return; if(p[1]){ el.textContent=p[1]; } else { el.innerHTML=emptyMsg; } el.setAttribute("data-raw",p[1]||""); });
+    var cmeta=$("scholarCompactMeta");
+    if(cmeta){ if(gsc.q){ var cn=gsc.n; cmeta.textContent=cn+" characters"+(cn>256?", still over 256: drop a concept or split into two searches":", fits Google Scholar's ~256 limit"); cmeta.className="qmeta"+(cn>256?" warn":""); } else { cmeta.textContent=""; cmeta.className="qmeta"; } }
     var meta=$("scholarMeta");
-    if(gs.q){
-      var n=gs.q.length;
-      meta.textContent = n + " characters" + (n>256 ? " — over Google Scholar's ~256 limit, trim to core terms" : "");
-      meta.className = "qmeta" + (n>256 ? " warn" : "");
-    } else { meta.textContent=""; meta.className="qmeta"; }
-    $("scholarLink").setAttribute("href", gs.url);
+    if(meta){ if(gs.q){ var n=gs.q.length; meta.textContent=n+" characters. Google keeps only the first ~256 and silently drops the rest, so prefer the compact query."; meta.className="qmeta"+(n>256?" warn":""); } else { meta.textContent=""; meta.className="qmeta"; } }
+    $("scholarLink").setAttribute("href", gsc.url);
     $("pubmedLink").setAttribute("href", pm.url);
     renderLinkouts();
     applyDBVisibility();
     renderLint();
+    renderRescue();
+    scheduleLiveEstimate();
   }
 
   function lintLevelColor(l){ return l==="error" ? "var(--danger)" : (l==="warning" ? "var(--scopus-deep)" : "var(--ink-soft)"); }
@@ -928,6 +1153,21 @@
     var rep=document.createElement("div"); rep.className="sg-note"; rep.style.marginTop="8px";
     rep.textContent="PRISMA-S reminder: record each database and platform, the date of the search, the full strategy for each database, all limits and filters, and the number of records retrieved.";
     host.appendChild(rep);
+  }
+
+  function renderRescue(){
+    var host=$("rescueList"); if(!host) return;
+    var empty=$("rescueEmpty");
+    var hasConcepts=(state.concepts||[]).some(function(c){ return (c.terms||[]).filter(Boolean).length>0; });
+    if(empty) empty.style.display = hasConcepts ? "none" : "";
+    host.innerHTML="";
+    if(!hasConcepts) return;
+    var hints=recallRescue(state.concepts, { years:yearVals(), docTypes:selectedDocTypes(), field:refineOpts().field, dbs:selectedDBs() });
+    hints.forEach(function(h){
+      var li=document.createElement("li"); li.style.fontSize="13px"; li.style.margin="5px 0"; li.style.color="var(--ink-soft)";
+      li.innerHTML="<b style=\"color:var(--ink)\">"+esc(h.step)+"</b> "+esc(h.detail);
+      host.appendChild(li);
+    });
   }
 
   function renderConcepts(){
@@ -1599,7 +1839,7 @@
   // ---- save / share / export wiring ----
   function gatherState(){
     return { v:1, topic:$("topic").value, yearFrom:parseInt($("yearFrom").value,10)||null, yearTo:parseInt($("yearTo").value,10)||null,
-      docTypes:selectedDocTypes(), dbs:selectedDBs(),
+      docTypes:selectedDocTypes(), dbs:selectedDBs(), refine:gatherRefine(),
       concepts:(state.concepts||[]).map(function(c){ return {label:c.label, terms:(c.terms||[]).slice(), mesh:(c.mesh||[]).slice()}; }), narrower:(state.narrower||[]).slice() };
   }
   function setToggles(containerId, attr, values){
@@ -1612,6 +1852,7 @@
     if(obj.yearTo!=null) $("yearTo").value=obj.yearTo;
     if(obj.docTypes) setToggles("doctypes","data-dt",obj.docTypes);
     if(obj.dbs) setToggles("dbtoggles","data-db",obj.dbs);
+    if(obj.refine) applyRefine(obj.refine);
     state.concepts=(obj.concepts||[]).map(function(c){ return {label:c.label||"Concept", terms:(c.terms||[]).slice(), mesh:Array.isArray(c.mesh)?c.mesh.slice():[]}; });
     state.narrower=obj.narrower||[]; state.focus=null;
     renderConcepts(); renderQueries(); renderNarrower(); updatePrompt();
@@ -1622,11 +1863,11 @@
     document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); },0);
   }
   function currentQueries(){
-    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes(), dbs=selectedDBs(), q={};
-    if(dbs.indexOf("Scopus")!==-1) q.Scopus=buildScopus(bl,y,dts);
-    if(dbs.indexOf("WoS")!==-1) q.WoS=buildWoS(bl,y,dts);
+    var bl=blocksFor(), y=yearVals(), dts=selectedDocTypes(), dbs=selectedDBs(), ref=refineOpts(), q={};
+    if(dbs.indexOf("Scopus")!==-1) q.Scopus=buildScopus(bl,y,dts,ref);
+    if(dbs.indexOf("WoS")!==-1) q.WoS=buildWoS(bl,y,dts,ref);
     if(dbs.indexOf("PubMed")!==-1) q.PubMed=buildPubMed(bl,y,dts).q;
-    if(dbs.indexOf("Scholar")!==-1) q.Scholar=buildScholar(bl,y).q;
+    if(dbs.indexOf("Scholar")!==-1) q.Scholar=buildScholarCompact(bl,y).q;
     if(dbs.indexOf("IEEE")!==-1) q.IEEE=buildIEEE(bl);
     if(dbs.indexOf("ACM")!==-1) q.ACM=buildACM(bl);
     if(dbs.indexOf("ERIC")!==-1) q.ERIC=buildERIC(bl);
@@ -1662,7 +1903,7 @@
   })();
 
   // copy (delegated for query cards)
-  var _dbNameMap={scopusStr:"Scopus",wosStr:"WoS",scholarStr:"Google Scholar",pubmedStr:"PubMed",ieeeStr:"IEEE",acmStr:"ACM",ericStr:"ERIC",ovidStr:"Ovid",ebscoStr:"EBSCO",evStr:"Eng Village"};
+  var _dbNameMap={scopusStr:"Scopus",wosStr:"WoS",scholarStr:"Google Scholar",scholarCompactStr:"Google Scholar",pubmedStr:"PubMed",ieeeStr:"IEEE",acmStr:"ACM",ericStr:"ERIC",ovidStr:"Ovid",ebscoStr:"EBSCO",evStr:"Eng Village"};
   document.addEventListener("click",function(e){
     var btn=e.target.closest(".copy"); if(!btn)return;
     var tgt=btn.getAttribute("data-target");
@@ -1681,6 +1922,8 @@
   document.querySelectorAll(".toggle").forEach(function(b){ b.setAttribute("aria-pressed", b.classList.contains("on")); });
   updatePrompt();
   renderConcepts();
+  ["rfField","rfAuthor","rfSource"].forEach(function(id){ var e=$(id); if(e){ e.addEventListener("input",renderQueries); e.addEventListener("change",renderQueries); } });
+  if($("estimateBtn")) $("estimateBtn").addEventListener("click", estimateRecall);
   renderQueries();
   renderNarrower();
   renderLinkouts();
@@ -1695,7 +1938,7 @@
       simpleQuery:simpleQuery, scholarTerm:scholarTerm, pubmedTerm:pubmedTerm,
       oaSeed:oaSeed, oaScore:oaScore, oaKeyness:oaKeyness, oaTokens:oaToks, OA_STOP:OA_STOP,
       rcNormalize:rcNormalize, rcTermMatches:rcTermMatches, rcAbstractFromIndex:rcAbstractFromIndex, rcCheck:rcCheck, rcStripTags:rcStripTags,
-      lintStrategy:lintStrategy, seedConceptsFromTopic:seedConceptsFromTopic,
+      lintStrategy:lintStrategy, recallRescue:recallRescue, oaEstimateFilter:oaEstimateFilter, oaEstSearchVal:oaEstSearchVal, seedConceptsFromTopic:seedConceptsFromTopic, rfVal:rfVal, QB_SCOPUS_FIELD:QB_SCOPUS_FIELD, QB_WOS_FIELD:QB_WOS_FIELD,
       qbEncodeState:qbEncodeState, qbDecodeState:qbDecodeState, buildSearchRecord:buildSearchRecord,
       SCOPUS_DT:SCOPUS_DT, WOS_DT:WOS_DT, PUBMED_PT:PUBMED_PT
     };
