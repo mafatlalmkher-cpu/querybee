@@ -3,6 +3,17 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
+## [Unreleased]
+
+### Changed
+- The companion abstract-screening tool no longer bundles an in-house screener. It is now a short referral page that recommends the best free dedicated tools (Catchii first, then ASReview, then Rayyan), with a what-to-pick guide, an honest note that it does not replace dedicated software, and a citation to van de Schoot et al. (2021) for ASReview. Records still leave QueryBee and the de-duplicator as RIS or CSV, which all three tools import.
+
+### Added
+- The companion Research Toolkit is now published as a separate site (https://github.com/mafatlalmkher-cpu/research-toolkit, live at https://mafatlalmkher-cpu.github.io/research-toolkit/), including a new "Free tools for your whole review" guide: a stage-by-stage comparison of free, and a few paid, tools for protocol registration, searching, reference management, full-text finding, de-duplication, screening, citation chasing, risk-of-bias assessment, meta-analysis, and reporting. Each stage gives three to five options, a short comparison, a default pick, and advice on when to keep the tool you already use. RevMan Web is flagged as free for researchers in Research4Life countries.
+
+### Notes
+- The core query builder (`index.html`) and the test suite are unchanged from 1.2.3; these are companion-tool and toolkit changes only.
+
 ## [1.2.3] - 2026-06-18
 
 ### Fixed (accessibility and design)
