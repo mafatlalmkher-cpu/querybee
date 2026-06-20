@@ -1,6 +1,6 @@
 # QueryBee
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20733036.svg)](https://doi.org/10.5281/zenodo.20733036)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20733035.svg)](https://doi.org/10.5281/zenodo.20733035)
 
 A single static HTML file that helps a researcher turn a topic into correctly fielded,
 fully parenthesized Boolean search strings for **ten databases**: Scopus, Web of Science,
