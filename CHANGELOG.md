@@ -3,16 +3,17 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
-## [Unreleased]
+## [1.3.0] - 2026-06-20
 
 ### Changed
-- The companion abstract-screening tool no longer bundles an in-house screener. It is now a short referral page that recommends the best free dedicated tools (Catchii first, then ASReview, then Rayyan), with a what-to-pick guide, an honest note that it does not replace dedicated software, and a citation to van de Schoot et al. (2021) for ASReview. Records still leave QueryBee and the de-duplicator as RIS or CSV, which all three tools import.
+- Reverted to a single copy-paste query builder: removed the in-page tab navigation, the in-page PRISMA section, and the optional LLM API-key panel, keeping the distributed file small and focused.
+- The footer's companion-tools line is now a larger, clearly visible callout, and its links point to the live Research Toolkit so they always resolve.
 
 ### Added
-- The companion Research Toolkit is now published as a separate site (https://github.com/mafatlalmkher-cpu/research-toolkit, live at https://mafatlalmkher-cpu.github.io/research-toolkit/), including a new "Free tools for your whole review" guide: a stage-by-stage comparison of free, and a few paid, tools for protocol registration, searching, reference management, full-text finding, de-duplication, screening, citation chasing, risk-of-bias assessment, meta-analysis, and reporting. Each stage gives three to five options, a short comparison, a default pick, and advice on when to keep the tool you already use. RevMan Web is flagged as free for researchers in Research4Life countries.
+- The companion tools are now published as a separate site, the Research Toolkit (https://github.com/mafatlalmkher-cpu/research-toolkit, live at https://mafatlalmkher-cpu.github.io/research-toolkit/, DOI 10.5281/zenodo.20773499). It adds a "Free tools for your whole review" guide, a stage-by-stage comparison of free tools for every stage of a review, and turns the abstract-screening companion into a referral to the best free dedicated tools (Catchii, ASReview, Rayyan), with a citation to van de Schoot et al. (2021) for ASReview.
 
 ### Notes
-- The core query builder (`index.html`) and the test suite are unchanged from 1.2.3; these are companion-tool and toolkit changes only.
+- The deterministic query-assembly engine and the unit test suite are unchanged from 1.2.3.
 
 ## [1.2.3] - 2026-06-18
 
