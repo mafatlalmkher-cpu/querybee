@@ -246,4 +246,4 @@ The Google Scholar query is flagged as too long. Scholar has a limit near 256 ch
 
 Cite QueryBee using the repository's `CITATION.cff` file, or:
 
-Kher, M. M., & Drori, E. (2026). *QueryBee: a single-file, browser-based fielded Boolean query builder for literature search* (Version 1.3.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20733035
+Kher, M. M., & Drori, E. (2026). *QueryBee: a single-file, browser-based fielded Boolean query builder for literature search* (Version 1.3.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20774354
