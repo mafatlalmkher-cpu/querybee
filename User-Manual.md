@@ -2,7 +2,7 @@
 title: "QueryBee User Manual"
 subtitle: "A browser-based builder for fielded Boolean literature searches"
 author: "Mafatlal M. Kher (ORCID 0000-0001-5600-0040) and Elyashiv Drori (ORCID 0000-0003-3353-0465) · Department of Chemical Engineering, Ariel University, Israel"
-date: "Version 1.2.3, June 2026"
+date: "Version 1.3.0, June 2026"
 ---
 
 # 1. What QueryBee does
